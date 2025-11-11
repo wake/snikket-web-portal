@@ -1119,7 +1119,7 @@ class ProsodyClient:
         session: aiohttp.ClientSession,
     ) -> AdminUserInfo:
         async with session.get(
-            self._admin_v1_endpoint("users", localpart, "/debug")
+            self._admin_v1_endpoint("users", localpart, "debug")
         ) as resp:
             await self._raise_error_from_response(resp)
             return await resp.json()
