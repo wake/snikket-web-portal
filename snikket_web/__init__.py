@@ -144,17 +144,12 @@ async def generic_error_handler(
     )
 
 
-@environ.config(prefix="SNIKKET")
-class MucConfig:
-    prosody_muc_endpoint = environ.var("")
-
-
 @environ.config(prefix="SNIKKET_WEB")
 class AppConfig:
     secret_key = environ.var()
     prosody_endpoint = environ.var()
+    prosody_muc_endpoint = environ.var("")
     domain = environ.var()
-    muc = environ.group(MucConfig)
     site_name = environ.var("")
     avatar_cache_ttl = environ.var(1800, converter=int)
     languages = environ.var([
@@ -224,7 +219,7 @@ def create_app() -> quart.Quart:
     app.config["PRIVACY_URI"] = config.privacy_uri
     app.config["ABUSE_EMAIL"] = config.abuse_email
     app.config["SECURITY_EMAIL"] = config.security_email
-    app.config["PROSODY_MUC_ENDPOINT"] = config.muc.prosody_muc_endpoint
+    app.config["PROSODY_MUC_ENDPOINT"] = config.prosody_muc_endpoint
     app.config["SESSION_COOKIE_SECURE"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 

@@ -833,7 +833,57 @@ async def edit_circle_add_chat(id_: str) -> typing.Union[str, werkzeug.Response]
 
     if form.validate_on_submit():
         if form.action_save.data:
-            await client.add_group_chat(id_, form.name.data)
+            import logging
+            dev_logger = logging.getLogger("dev")
+            dev_logger.setLevel(logging.DEBUG)
+            if not dev_logger.handlers:
+                fh = logging.FileHandler("dev.log")
+                fh.setFormatter(logging.Formatter(
+                    "%(asctime)s - %(levelname)s - %(message)s"
+                ))
+                dev_logger.addHandler(fh)
+
+            dev_logger.info(f"[add_chat] Starting add_group_chat for circle={id_}, name={form.name.data}")
+
+            # Get existing chat IDs before adding
+            existing_chat_ids = {chat.id_ for chat in circle.chats}
+            dev_logger.debug(f"[add_chat] Existing chat IDs: {existing_chat_ids}")
+
+            new_chat = await client.add_group_chat(id_, form.name.data)
+            dev_logger.info(f"[add_chat] add_group_chat returned: {new_chat}")
+
+            # If API didn't return chat info, fetch updated circle to find new chat
+            if new_chat is None:
+                dev_logger.info("[add_chat] new_chat is None, fetching updated circle")
+                updated_circle = await client.get_group_by_id(id_)
+                dev_logger.debug(f"[add_chat] Updated circle chats: {[(c.id_, c.jid, c.name) for c in updated_circle.chats]}")
+                for chat in updated_circle.chats:
+                    if chat.id_ not in existing_chat_ids:
+                        new_chat = chat
+                        dev_logger.info(f"[add_chat] Found new chat: id={chat.id_}, jid={chat.jid}")
+                        break
+
+            # Set the current user as owner of the new chat via MUC API
+            if new_chat is not None:
+                try:
+                    current_user_jid = client.session_address
+                    dev_logger.info(f"[add_chat] Setting owner: room={new_chat.jid}, user={current_user_jid}")
+                    await client.muc_set_affiliation(
+                        new_chat.jid,
+                        current_user_jid,
+                        "owner",
+                    )
+                    dev_logger.info("[add_chat] muc_set_affiliation succeeded")
+                except Exception as e:
+                    dev_logger.error(f"[add_chat] muc_set_affiliation failed: {e}")
+                    await flash(
+                        _("Group chat created, but failed to set owner: %(error)s",
+                          error=str(e)),
+                        "warning",
+                    )
+            else:
+                dev_logger.warning("[add_chat] Could not find new chat, skipping owner assignment")
+
             await flash(
                 _("New group chat added to circle"),
                 "success",

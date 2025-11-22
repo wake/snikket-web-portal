@@ -1335,7 +1335,7 @@ class ProsodyClient:
         name: str,
         *,
         session: aiohttp.ClientSession,
-    ) -> None:
+    ) -> typing.Optional[AdminGroupChatInfo]:
 
         payload: typing.Dict[str, typing.Any] = {
             "name": name,
@@ -1346,6 +1346,14 @@ class ProsodyClient:
             json=payload,
         ) as resp:
             await self._raise_error_from_response(resp)
+            # Prosody API may return empty response or non-JSON on success
+            content_type = resp.headers.get("Content-Type", "")
+            if "application/json" in content_type:
+                try:
+                    return AdminGroupChatInfo.from_api_response(await resp.json())
+                except Exception:
+                    return None
+            return None
 
     @autosession
     async def remove_group_member(

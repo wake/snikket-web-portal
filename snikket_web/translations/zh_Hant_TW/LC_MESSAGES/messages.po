@@ -793,6 +793,9 @@ msgstr "編輯聊天群組 “%(name)s”"
 msgid "Edit group chat %(chat_name)s"
 msgstr "編輯聊天群組 %(chat_name)s"
 
+msgid "Group chat updated"
+msgstr "聊天群組已更新"
+
 msgid "Return to circle"
 msgstr "返回人員群組"
 

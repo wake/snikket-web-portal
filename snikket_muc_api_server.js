@@ -8,11 +8,11 @@ const DOCKER_CONTAINER = 'snikket';
 
 // 非常保守的 JID / 房間 / 權限檢查，避免被 injection
 function isValidRoom(room) {
-  return /^[a-zA-Z0-9._-]+@groups\.protype\.tw$/.test(room);
+  return /^[a-zA-Z0-9._-]+@groups\.chat\.protype\.tw$/.test(room);
 }
 
 function isValidUser(user) {
-  return /^[a-zA-Z0-9._-]+@protype\.tw$/.test(user);
+  return /^[a-zA-Z0-9._-]+@chat\.protype\.tw$/.test(user);
 }
 
 function isValidAffiliation(aff) {
