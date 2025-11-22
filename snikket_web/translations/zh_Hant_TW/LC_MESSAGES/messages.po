@@ -814,6 +814,30 @@ msgstr "管理員"
 msgid "Update group chat"
 msgstr "更新聊天群組"
 
+msgid "Chat managers"
+msgstr "群組管理員"
+
+msgid "Manage who can administrate this group chat."
+msgstr "設定此聊天群組具管理權限的人員。"
+
+msgid "Role"
+msgstr "權限角色"
+
+msgid "All circle members added"
+msgstr "所有群組成員已加入"
+
+msgid "All members of this circle are already managers of this group chat."
+msgstr "此人員群組的所有成員已是此聊天群組的管理員。"
+
+msgid "This group chat currently has no managers."
+msgstr "此聊天群組目前沒有任何管理員。"
+
+msgid "This group chat currently has no members."
+msgstr "此聊天群組目前沒有成員。"
+
+msgid "Add manager"
+msgstr "新增管理員"
+
 msgid "This group chat belongs to circle %(circle_name)s."
 msgstr "此聊天群組屬於人員群組 %(circle_name)s。"
 

@@ -686,8 +686,26 @@ class EditCircleChatForm(BaseForm):
         _l("Group chat avatar"),
     )
 
+    # Member management
+    user_to_add = wtforms.SelectField(
+        _l("Select user"),
+        validate_choice=False,
+    )
+
+    affiliation_to_set = wtforms.SelectField(
+        _l("Role"),
+        choices=[
+            ("admin", _l("Admin")),
+            ("owner", _l("Owner")),
+        ],
+        validate_choice=False,
+    )
+
     action_save = wtforms.SubmitField(_l("Update group chat"))
     action_delete_avatar = wtforms.SubmitField(_l("Remove avatar"))
+    action_add_manager = wtforms.SubmitField(_l("Add manager"))
+    action_remove_member = wtforms.StringField()
+    action_set_affiliation = wtforms.StringField()
 
 
 ECHATAVATAR_TOOBIG = _l(
@@ -762,44 +780,118 @@ async def edit_circle_chat(
             )
             return redirect(url_for(".edit_circle", id_=id_))
 
+        # Get manager affiliations for this chat (from circle members only)
+        # Only show owner/admin roles, not regular members
+        domain = current_app.config["SNIKKET_DOMAIN"]
+        chat_managers: typing.List[typing.Tuple[str, str]] = []  # (localpart, affiliation)
+        non_managers: typing.List[str] = []  # localparts not manager in chat
+
+        for localpart in circle.members:
+            user_jid = f"{localpart}@{domain}"
+            try:
+                affiliation = await client.muc_get_affiliation(muc_jid, user_jid)
+                if affiliation and affiliation in ["owner", "admin"]:
+                    chat_managers.append((localpart, affiliation))
+                else:
+                    non_managers.append(localpart)
+            except Exception:
+                non_managers.append(localpart)
+
     form = EditCircleChatForm()
+    form.user_to_add.choices = sorted((lp, lp) for lp in non_managers)
 
     if request.method != "POST":
         form.name.data = current_name or chat.name
 
-    if form.validate_on_submit():
-        if form.action_delete_avatar.data:
-            await client.delete_muc_avatar(muc_jid)
-            await flash(
-                _("Group chat avatar removed"),
-                "success",
-            )
+    if request.method == "POST":
+        # Manager actions - no full form validation needed
+        if form.action_add_manager.data:
+            user_to_add = form.user_to_add.data
+            affiliation = form.affiliation_to_set.data or "admin"
+            if user_to_add and user_to_add in non_managers:
+                user_jid = f"{user_to_add}@{domain}"
+                try:
+                    await client.muc_set_affiliation(muc_jid, user_jid, affiliation)
+                    await flash(
+                        _("Manager added to group chat"),
+                        "success",
+                    )
+                except Exception as e:
+                    await flash(
+                        _("Failed to add manager: %(error)s", error=str(e)),
+                        "alert",
+                    )
             return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
 
-        elif form.action_save.data:
-            ok = True
-
-            # Handle avatar upload
-            file_info = (await request.files).get(form.avatar.name)
-            if file_info is not None:
-                mimetype = file_info.mimetype
-                data = file_info.stream.read()
-                if len(data) > max_avatar_size:
-                    form.avatar.errors.append(ECHATAVATAR_TOOBIG)
-                    ok = False
-                elif len(data) > 0:
-                    await client.set_muc_avatar(muc_jid, data, mimetype)
-
-            # Update name if changed
-            if ok and form.name.data != current_name:
-                await client.set_muc_name(muc_jid, form.name.data)
-
-            if ok:
+        elif form.action_remove_member.data:
+            user_to_remove = form.action_remove_member.data
+            user_jid = f"{user_to_remove}@{domain}"
+            try:
+                await client.muc_set_affiliation(muc_jid, user_jid, "none")
                 await flash(
-                    _("Group chat updated"),
+                    _("Manager removed from group chat"),
+                    "success",
+                )
+            except Exception as e:
+                await flash(
+                    _("Failed to remove manager: %(error)s", error=str(e)),
+                    "alert",
+                )
+            return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
+
+        elif form.action_set_affiliation.data:
+            # Format: "localpart:affiliation"
+            parts = form.action_set_affiliation.data.split(":", 1)
+            if len(parts) == 2:
+                localpart, new_affiliation = parts
+                user_jid = f"{localpart}@{domain}"
+                try:
+                    await client.muc_set_affiliation(muc_jid, user_jid, new_affiliation)
+                    await flash(
+                        _("Member role updated"),
+                        "success",
+                    )
+                except Exception as e:
+                    await flash(
+                        _("Failed to update role: %(error)s", error=str(e)),
+                        "alert",
+                    )
+            return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
+
+        # Full form validation for save/delete_avatar actions
+        elif form.validate_on_submit():
+            if form.action_delete_avatar.data:
+                await client.delete_muc_avatar(muc_jid)
+                await flash(
+                    _("Group chat avatar removed"),
                     "success",
                 )
                 return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
+
+            elif form.action_save.data:
+                ok = True
+
+                # Handle avatar upload
+                file_info = (await request.files).get(form.avatar.name)
+                if file_info is not None:
+                    mimetype = file_info.mimetype
+                    data = file_info.stream.read()
+                    if len(data) > max_avatar_size:
+                        form.avatar.errors.append(ECHATAVATAR_TOOBIG)
+                        ok = False
+                    elif len(data) > 0:
+                        await client.set_muc_avatar(muc_jid, data, mimetype)
+
+                # Update name if changed
+                if ok and form.name.data != current_name:
+                    await client.set_muc_name(muc_jid, form.name.data)
+
+                if ok:
+                    await flash(
+                        _("Group chat updated"),
+                        "success",
+                    )
+                    return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
 
     return await render_template(
         "admin_edit_circle_chat.html",
@@ -808,6 +900,8 @@ async def edit_circle_chat(
         form=form,
         muc_avatar=muc_avatar,
         max_avatar_size=max_avatar_size,
+        chat_managers=chat_managers,
+        domain=domain,
     )
 
 

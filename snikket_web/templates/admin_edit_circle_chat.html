@@ -1,5 +1,5 @@
 {% extends "admin_app.html" %}
-{% from "library.j2" import form_button, standard_button, render_errors with context %}
+{% from "library.j2" import form_button, standard_button, render_errors, custom_form_button with context %}
 {% block content %}
 <h1>{% trans chat_name=target_chat.name %}Edit group chat {{ chat_name }}{% endtrans %}</h1>
 <p class="weak">{% trans circle_name=(target_circle | circle_name) %}This group chat belongs to circle {{ circle_name }}.{% endtrans %}</p>
@@ -40,6 +40,65 @@
 	</div>
 </div>
 </form>
+
+<h2 id="managers">{% trans %}Chat managers{% endtrans %}</h2>
+<p>{% trans %}Manage who can administrate this group chat.{% endtrans %}</p>
+
+{%- if chat_managers -%}
+<form method="POST">
+{{- form.csrf_token -}}
+<div class="el-2 elevated"><table>
+	<thead>
+		<th>{% trans %}User{% endtrans %}</th>
+		<th>{% trans %}Role{% endtrans %}</th>
+		<th>{% trans %}Actions{% endtrans %}</th>
+	</thead>
+	<tbody>
+{%- for localpart, affiliation in chat_managers -%}
+		<tr>
+			<td>{{ localpart }}</td>
+			<td>
+				<select name="{{ form.action_set_affiliation.name }}" onchange="this.form.submit()" style="padding: 0.25em;">
+					<option value="{{ localpart }}:admin" {% if affiliation == 'admin' %}selected{% endif %}>{% trans %}Admin{% endtrans %}</option>
+					<option value="{{ localpart }}:owner" {% if affiliation == 'owner' %}selected{% endif %}>{% trans %}Owner{% endtrans %}</option>
+				</select>
+			</td>
+			<td class="nowrap">
+				{%- call custom_form_button("remove_user", form.action_remove_member.name, localpart, class="primary danger", slim=True) -%}
+					{% trans username=localpart %}Remove {{ username }} from managers{% endtrans %}
+				{%- endcall -%}
+			</td>
+		</tr>
+{%- endfor -%}
+	</tbody>
+</table></div>
+</form>
+{%- else -%}
+<p>{% trans %}This group chat currently has no managers.{% endtrans %}</p>
+{%- if not target_circle.members -%}
+<p>{% trans %}This group chat currently has no members.{% endtrans %}</p>
+{%- endif -%}
+{%- endif -%}
+
+{%- if form.user_to_add.choices -%}
+<h3>{% trans %}Add manager{% endtrans %}</h3>
+<form method="POST">
+{{- form.csrf_token -}}
+<div class="form layout-expanded">
+	<div class="f-ebox">
+		{{ form.user_to_add.label }}
+		<div class="select-wrap">{{ form.user_to_add }}</div>
+	</div>
+	<div class="f-ebox">
+		{{ form.affiliation_to_set.label }}
+		<div class="select-wrap">{{ form.affiliation_to_set }}</div>
+	</div>
+	<div class="f-bbox">
+		{%- call form_button("add_user", form.action_add_manager, class="primary") %}{% endcall -%}
+	</div>
+</div>
+</form>
+{%- endif -%}
 
 <script type="text/javascript">
 document.getElementById("{{ form.avatar.id }}").onchange = function() {
