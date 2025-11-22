@@ -40,6 +40,10 @@ async def proc() -> typing.Dict[str, typing.Any]:
             **kwargs
         )
 
+    def b64encode(data: bytes) -> str:
+        """Encode bytes to base64 string for use in templates."""
+        return base64.b64encode(data).decode("ascii")
+
     try:
         user_info = await infra.client.get_user_info()
     except (aiohttp.ClientError, werkzeug.exceptions.HTTPException):
@@ -48,6 +52,7 @@ async def proc() -> typing.Dict[str, typing.Any]:
     return {
         "url_for_avatar": url_for_avatar,
         "text_to_css": colour.text_to_css,
+        "b64encode": b64encode,
         "lang": infra.selected_locale(),
         "user_info": user_info,
         "is_in_debug_mode": current_app.debug,

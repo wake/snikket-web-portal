@@ -1377,6 +1377,91 @@ class ProsodyClient:
         ) as resp:
             await self._raise_error_from_response(resp)
 
+    # MUC Configuration and Avatar methods (XEP-0045, XEP-0486)
+
+    @autosession
+    async def get_muc_config(
+        self,
+        muc_jid: str,
+        *,
+        session: aiohttp.ClientSession,
+    ) -> typing.Mapping[str, typing.Sequence[str]]:
+        """Get MUC room configuration form."""
+        resp = await self._xml_iq_call(
+            session,
+            xmpputil.make_muc_config_get_request(muc_jid),
+        )
+        return xmpputil.extract_muc_config_form(resp)
+
+    @autosession
+    async def set_muc_name(
+        self,
+        muc_jid: str,
+        name: str,
+        *,
+        session: aiohttp.ClientSession,
+    ) -> None:
+        """Set MUC room name."""
+        resp = await self._xml_iq_call(
+            session,
+            xmpputil.make_muc_config_set_request(
+                muc_jid,
+                {xmpputil.FORM_FIELD_MUC_ROOMNAME: name},
+            ),
+        )
+        xmpputil.extract_iq_reply(resp)
+
+    @autosession
+    async def get_muc_avatar(
+        self,
+        muc_jid: str,
+        *,
+        session: aiohttp.ClientSession,
+    ) -> typing.Optional[typing.Mapping[str, typing.Any]]:
+        """Get MUC room avatar from vCard.
+
+        Returns:
+            Dictionary with 'type' and 'data' keys, or None if no avatar.
+        """
+        try:
+            resp = await self._xml_iq_call(
+                session,
+                xmpputil.make_muc_vcard_get_request(muc_jid),
+            )
+            return xmpputil.extract_muc_vcard_photo(resp)
+        except werkzeug.exceptions.HTTPException:
+            return None
+
+    @autosession
+    async def set_muc_avatar(
+        self,
+        muc_jid: str,
+        data: bytes,
+        mimetype: str,
+        *,
+        session: aiohttp.ClientSession,
+    ) -> None:
+        """Set MUC room avatar via vCard."""
+        resp = await self._xml_iq_call(
+            session,
+            xmpputil.make_muc_vcard_set_request(muc_jid, data, mimetype),
+        )
+        xmpputil.extract_iq_reply(resp)
+
+    @autosession
+    async def delete_muc_avatar(
+        self,
+        muc_jid: str,
+        *,
+        session: aiohttp.ClientSession,
+    ) -> None:
+        """Remove MUC room avatar by setting empty vCard."""
+        resp = await self._xml_iq_call(
+            session,
+            xmpputil.make_muc_vcard_set_request(muc_jid, None, None),
+        )
+        xmpputil.extract_iq_reply(resp)
+
     @autosession
     async def export_account_data(
         self,

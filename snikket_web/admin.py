@@ -657,6 +657,120 @@ class AddCircleChatForm(BaseForm):
     action_save = wtforms.SubmitField(_l("Create group chat"))
 
 
+class EditCircleChatForm(BaseForm):
+    name = wtforms.StringField(
+        _l("Group chat name"),
+        validators=[wtforms.validators.InputRequired()],
+    )
+
+    avatar = wtforms.FileField(
+        _l("Group chat avatar"),
+    )
+
+    action_save = wtforms.SubmitField(_l("Update group chat"))
+    action_delete_avatar = wtforms.SubmitField(_l("Remove avatar"))
+
+
+ECHATAVATAR_TOOBIG = _l(
+    "The chosen avatar is too big. Please choose a smaller image."
+)
+
+
+@bp.route("/circle/<id_>/chat/<chat_id>", methods=["GET", "POST"])
+@client.require_admin_session()
+async def edit_circle_chat(
+    id_: str, chat_id: str
+) -> typing.Union[str, werkzeug.Response]:
+    max_avatar_size = current_app.config["MAX_AVATAR_SIZE"]
+
+    async with client.authenticated_session() as session:
+        try:
+            circle = await client.get_group_by_id(
+                id_,
+                session=session,
+            )
+        except aiohttp.ClientResponseError as exc:
+            if exc.status == 404:
+                await flash(
+                    _("No such circle exists"),
+                    "alert",
+                )
+                return redirect(url_for(".circles"))
+            raise
+
+        # Find the chat in the circle
+        chat = None
+        for c in circle.chats:
+            if c.id_ == chat_id:
+                chat = c
+                break
+
+        if chat is None:
+            await flash(
+                _("No such group chat exists in this circle"),
+                "alert",
+            )
+            return redirect(url_for(".edit_circle", id_=id_))
+
+        # Get current MUC config and avatar
+        muc_jid = chat.jid
+        try:
+            muc_config = await client.get_muc_config(muc_jid, session=session)
+            current_name = muc_config.get("muc#roomconfig_roomname", [""])[0]
+        except Exception:
+            current_name = chat.name
+
+        muc_avatar = await client.get_muc_avatar(muc_jid, session=session)
+
+    form = EditCircleChatForm()
+
+    if request.method != "POST":
+        form.name.data = current_name or chat.name
+
+    if form.validate_on_submit():
+        if form.action_delete_avatar.data:
+            await client.delete_muc_avatar(muc_jid)
+            await flash(
+                _("Group chat avatar removed"),
+                "success",
+            )
+            return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
+
+        elif form.action_save.data:
+            ok = True
+
+            # Handle avatar upload
+            file_info = (await request.files).get(form.avatar.name)
+            if file_info is not None:
+                mimetype = file_info.mimetype
+                data = file_info.stream.read()
+                if len(data) > max_avatar_size:
+                    form.avatar.errors.append(ECHATAVATAR_TOOBIG)
+                    ok = False
+                elif len(data) > 0:
+                    await client.set_muc_avatar(muc_jid, data, mimetype)
+
+            # Update name if changed
+            if ok and form.name.data != current_name:
+                await client.set_muc_name(muc_jid, form.name.data)
+
+            if ok:
+                await flash(
+                    _("Group chat updated"),
+                    "success",
+                )
+                return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
+
+    return await render_template(
+        "admin_edit_circle_chat.html",
+        target_circle=circle,
+        target_chat=chat,
+        form=form,
+        muc_avatar=muc_avatar,
+        max_avatar_size=max_avatar_size,
+    )
+
+
 @bp.route("/circle/<id_>/add_chat", methods=["GET", "POST"])
 @client.require_admin_session()
 async def edit_circle_add_chat(id_: str) -> typing.Union[str, werkzeug.Response]:

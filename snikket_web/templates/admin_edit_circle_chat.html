@@ -1,0 +1,57 @@
+{% extends "admin_app.html" %}
+{% from "library.j2" import form_button, standard_button, render_errors with context %}
+{% block content %}
+<h1>{% trans chat_name=target_chat.name %}Edit group chat {{ chat_name }}{% endtrans %}</h1>
+<p class="weak">{% trans circle_name=(target_circle | circle_name) %}This group chat belongs to circle {{ circle_name }}.{% endtrans %}</p>
+
+<form method="POST" enctype="multipart/form-data">
+{{- form.csrf_token -}}
+{% call render_errors(form) %}{% endcall %}
+<div class="form layout-expanded">
+	<h2 class="form-title">{% trans %}Group chat information{% endtrans %}</h2>
+	<div class="f-ebox">
+		{{ form.name.label }}
+		{{ form.name }}
+	</div>
+	<div class="f-ebox">
+		{{ form.avatar.label }}
+		<div class="avatar-wrap">
+		{%- if muc_avatar -%}
+		<div class="avatar current-avatar">
+			<img src="data:{{ muc_avatar.type }};base64,{{ muc_avatar.data | b64encode }}" alt="{% trans %}Current avatar{% endtrans %}">
+		</div>
+		{%- else -%}
+		<div class="avatar shim" style="background-color: {{ text_to_css(target_chat.jid) }}"><span data-avatar-char="{{ target_chat.name[0] if target_chat.name else '?' }}"></span></div>
+		{%- endif -%}
+		{{ form.avatar(accept="image/png,image/jpeg,image/gif",
+				 data_maxsize=max_avatar_size) }}
+		</div>
+		{%- if muc_avatar -%}
+		<div class="f-bbox">
+			{%- call form_button("delete", form.action_delete_avatar, class="secondary danger") %}{% endcall -%}
+		</div>
+		{%- endif -%}
+	</div>
+	<div class="f-bbox">
+		{%- call standard_button("back", url_for(".edit_circle", id_=target_circle.id_), class="tertiary") -%}
+			{% trans %}Return to circle{% endtrans %}
+		{%- endcall -%}
+		{%- call form_button("done", form.action_save, class="primary") %}{% endcall -%}
+	</div>
+</div>
+</form>
+
+<script type="text/javascript">
+document.getElementById("{{ form.avatar.id }}").onchange = function() {
+	var maxsize_s = this.dataset.maxsize;
+	var maxsize = parseInt(maxsize_s);
+	if (this.files[0].size > maxsize) {
+		this.setCustomValidity("{% trans %}The chosen avatar is too big.{% endtrans %}");
+		this.reportValidity();
+		this.value = null;
+	} else {
+		this.setCustomValidity("");
+	}
+};
+</script>
+{% endblock %}

@@ -49,6 +49,19 @@ TAG_DATA_FORM_VALUE = "{{{}}}value".format(NS_DATA_FORM)
 FORM_NODE_CONFIG = "http://jabber.org/protocol/pubsub#node_config"
 FORM_FIELD_PUBSUB_ACCESS_MODEL = "pubsub#access_model"
 
+# MUC (XEP-0045) namespaces and tags
+NS_MUC_OWNER = "http://jabber.org/protocol/muc#owner"
+TAG_MUC_OWNER_QUERY = "{{{}}}query".format(NS_MUC_OWNER)
+FORM_MUC_ROOMCONFIG = "http://jabber.org/protocol/muc#roomconfig"
+FORM_FIELD_MUC_ROOMNAME = "muc#roomconfig_roomname"
+
+# vcard-temp (XEP-0054, XEP-0486) namespaces and tags
+NS_VCARD_TEMP = "vcard-temp"
+TAG_VCARD = "{{{}}}vCard".format(NS_VCARD_TEMP)
+TAG_VCARD_PHOTO = "{{{}}}PHOTO".format(NS_VCARD_TEMP)
+TAG_VCARD_TYPE = "{{{}}}TYPE".format(NS_VCARD_TEMP)
+TAG_VCARD_BINVAL = "{{{}}}BINVAL".format(NS_VCARD_TEMP)
+
 
 SimpleJID = typing.Tuple[typing.Optional[str], str, typing.Optional[str]]
 T = typing.TypeVar("T")
@@ -371,3 +384,125 @@ def extract_pubsub_node_config_get_reply(
         result[var] = values
 
     return result
+
+
+# MUC Configuration (XEP-0045) functions
+
+def make_muc_config_get_request(muc_jid: str) -> ET.Element:
+    """Create IQ request to get MUC room configuration form."""
+    req = ET.Element("iq", type="get", to=muc_jid)
+    ET.SubElement(req, "query", xmlns=NS_MUC_OWNER)
+    return req
+
+
+def make_muc_config_set_request(
+        muc_jid: str,
+        fields: typing.Mapping[str, str],
+        ) -> ET.Element:
+    """Create IQ request to set MUC room configuration.
+
+    Args:
+        muc_jid: The JID of the MUC room
+        fields: Dictionary of field var -> value to set
+    """
+    req = ET.Element("iq", type="set", to=muc_jid)
+    query = ET.SubElement(req, "query", xmlns=NS_MUC_OWNER)
+    form = ET.SubElement(query, "x", xmlns=NS_DATA_FORM, type="submit")
+
+    # Add FORM_TYPE
+    form_type_field = ET.SubElement(form, "field", var="FORM_TYPE", type="hidden")
+    ET.SubElement(form_type_field, "value").text = FORM_MUC_ROOMCONFIG
+
+    # Add provided fields
+    for var, value in fields.items():
+        field = ET.SubElement(form, "field", var=var)
+        ET.SubElement(field, "value").text = value
+
+    return req
+
+
+def extract_muc_config_form(
+        iq_tree: ET.Element,
+        ) -> typing.Mapping[str, typing.Sequence[str]]:
+    """Extract MUC configuration form fields from IQ response."""
+    query = extract_iq_reply(iq_tree, TAG_MUC_OWNER_QUERY)
+    if query is None:
+        raise ValueError("invalid reply: missing query")
+
+    form = query.find(TAG_DATA_FORM_X)
+    if form is None:
+        raise ValueError("invalid reply: missing form")
+
+    result: typing.MutableMapping[str, typing.List[str]] = {}
+    for child in form.findall(TAG_DATA_FORM_FIELD):
+        var = child.get("var")
+        if var is None:
+            continue
+        values = [value_tag.text or ""
+                  for value_tag in child.findall(TAG_DATA_FORM_VALUE)]
+        result[var] = values
+
+    return result
+
+
+# MUC vCard/Avatar (XEP-0054, XEP-0486) functions
+
+def make_muc_vcard_get_request(muc_jid: str) -> ET.Element:
+    """Create IQ request to get MUC room vCard (for avatar)."""
+    req = ET.Element("iq", type="get", to=muc_jid)
+    ET.SubElement(req, "vCard", xmlns=NS_VCARD_TEMP)
+    return req
+
+
+def make_muc_vcard_set_request(
+        muc_jid: str,
+        photo_data: typing.Optional[bytes] = None,
+        photo_type: typing.Optional[str] = None,
+        ) -> ET.Element:
+    """Create IQ request to set MUC room vCard with avatar.
+
+    Args:
+        muc_jid: The JID of the MUC room
+        photo_data: Binary image data (None to remove avatar)
+        photo_type: MIME type of the image (e.g., "image/png")
+    """
+    req = ET.Element("iq", type="set", to=muc_jid)
+    vcard = ET.SubElement(req, "vCard", xmlns=NS_VCARD_TEMP)
+
+    if photo_data is not None and photo_type is not None:
+        photo = ET.SubElement(vcard, "PHOTO")
+        ET.SubElement(photo, "TYPE").text = photo_type
+        ET.SubElement(photo, "BINVAL").text = base64.b64encode(photo_data).decode("ascii")
+
+    return req
+
+
+def extract_muc_vcard_photo(
+        iq_tree: ET.Element,
+        ) -> typing.Optional[typing.Mapping[str, typing.Any]]:
+    """Extract photo info from MUC vCard response.
+
+    Returns:
+        Dictionary with 'type' and 'data' keys, or None if no photo.
+    """
+    vcard = extract_iq_reply(iq_tree, TAG_VCARD)
+    if vcard is None:
+        return None
+
+    photo = vcard.find(TAG_VCARD_PHOTO)
+    if photo is None:
+        return None
+
+    type_el = photo.find(TAG_VCARD_TYPE)
+    binval_el = photo.find(TAG_VCARD_BINVAL)
+
+    if type_el is None or binval_el is None:
+        return None
+
+    if type_el.text is None or binval_el.text is None:
+        return None
+
+    return {
+        "type": type_el.text,
+        "data": base64.b64decode(binval_el.text),
+    }

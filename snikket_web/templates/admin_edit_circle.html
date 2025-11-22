@@ -49,6 +49,9 @@
 		<tr>
 			<td>{% call value_or_hint(chat.name) %}{% endcall %}</td>
 			<td class="nowrap">
+				{%- call standard_button("edit", url_for(".edit_circle_chat", id_=target_circle.id_, chat_id=chat.id_), class="primary", slim=True) -%}
+					{% trans name=chat.name %}Edit group chat '{{ name }}'{% endtrans %}
+				{%- endcall -%}
 				{%- call custom_form_button("delete", form.action_remove_group_chat.name, chat.id_, class="primary danger", slim=True) -%}
 					{% trans name=chat.name %}Delete group chat '{{ name }}'{% endtrans %}
 				{%- endcall -%}
