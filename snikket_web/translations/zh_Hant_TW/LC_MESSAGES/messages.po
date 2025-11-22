@@ -787,6 +787,27 @@ msgstr "刪除聊天群組 “%(name)s”"
 msgid "This circle currently has no group chats."
 msgstr "此人員群組目前沒有聊天群組。"
 
+msgid "Edit group chat '%(name)s'"
+msgstr "編輯聊天群組 “%(name)s”"
+
+msgid "Edit group chat %(chat_name)s"
+msgstr "編輯聊天群組 %(chat_name)s"
+
+msgid "Return to circle"
+msgstr "返回人員群組"
+
+msgid "Group chat information"
+msgstr "聊天群組資訊"
+
+msgid "Group chat avatar"
+msgstr "聊天群組頭像"
+
+msgid "Update group chat"
+msgstr "更新聊天群組"
+
+msgid "This group chat belongs to circle %(circle_name)s."
+msgstr "此聊天群組屬於人員群組 %(circle_name)s。"
+
 #: snikket_web/templates/admin_edit_circle.html:64
 msgid "Add group chat"
 msgstr "新增聊天群組"
