@@ -802,6 +802,9 @@ msgstr "聊天群組資訊"
 msgid "Group chat avatar"
 msgstr "聊天群組頭像"
 
+msgid "Administrators"
+msgstr "管理員"
+
 msgid "Update group chat"
 msgstr "更新聊天群組"
 

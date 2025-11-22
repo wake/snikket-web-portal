@@ -543,6 +543,24 @@ async def edit_circle(id_: str) -> typing.Union[str, werkzeug.Response]:
             (localpart, users.get(localpart)) for localpart in sorted(circle.members)
         ]
 
+        # Get owner/admin affiliations for each chat via MUC API
+        chat_admins: typing.Dict[str, typing.List[str]] = {}
+        domain = current_app.config["SNIKKET_DOMAIN"]
+        for chat in circle.chats:
+            admins: typing.List[str] = []
+            # Check each circle member's affiliation in this chat
+            for localpart in circle.members:
+                user_jid = f"{localpart}@{domain}"
+                try:
+                    affiliation = await client.muc_get_affiliation(
+                        chat.jid, user_jid
+                    )
+                    if affiliation in ["owner", "admin"]:
+                        admins.append(localpart)
+                except Exception:
+                    pass  # Skip if MUC API fails
+            chat_admins[chat.id_] = admins
+
     form = EditCircleForm()
     form.user_to_add.choices = sorted(
         (localpart, localpart)
@@ -606,6 +624,7 @@ async def edit_circle(id_: str) -> typing.Union[str, werkzeug.Response]:
         circle_chats=circle.chats,
         circle_members=circle_members,
         invite_form=invite_form,
+        chat_admins=chat_admins,
     )
 
 
