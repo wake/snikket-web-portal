@@ -18,7 +18,7 @@
 		<div class="avatar-wrap">
 		{%- if muc_avatar -%}
 		<div class="avatar current-avatar">
-			<img src="data:{{ muc_avatar.type }};base64,{{ muc_avatar.data | b64encode }}" alt="{% trans %}Current avatar{% endtrans %}">
+			<img src="data:{{ muc_avatar.type }};base64,{{ b64encode(muc_avatar.data) }}" alt="{% trans %}Current avatar{% endtrans %}">
 		</div>
 		{%- else -%}
 		<div class="avatar shim" style="background-color: {{ text_to_css(target_chat.jid) }}"><span data-avatar-char="{{ target_chat.name[0] if target_chat.name else '?' }}"></span></div>

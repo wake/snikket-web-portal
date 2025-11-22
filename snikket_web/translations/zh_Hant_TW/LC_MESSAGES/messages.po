@@ -796,6 +796,9 @@ msgstr "編輯聊天群組 %(chat_name)s"
 msgid "Group chat updated"
 msgstr "聊天群組已更新"
 
+msgid "Group chat avatar removed"
+msgstr "聊天群組頭像已移除"
+
 msgid "Return to circle"
 msgstr "返回人員群組"
 
