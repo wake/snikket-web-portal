@@ -373,6 +373,7 @@ class ProsodyClient:
     CTX_PLAIN_SESSION = "_ProsodyClient__session"
     CTX_AUTH_SESSION = "_ProsodyClient__auth_session"
     CONFIG_ENDPOINT = "PROSODY_ENDPOINT"
+    CONFIG_MUC_ENDPOINT = "PROSODY_MUC_ENDPOINT"
     SESSION_TOKEN = "prosody_access_token"
     SESSION_CACHED_SCOPE = "prosody_scope_cache"
     SESSION_ADDRESS = "prosody_jid"
@@ -437,6 +438,13 @@ class ProsodyClient:
 
     def _xep227_endpoint(self, subpath: str) -> str:
         return "{}/xep227{}".format(self._endpoint_base, subpath)
+
+    @property
+    def _muc_endpoint_base(self) -> str:
+        return current_app.config.get(self.CONFIG_MUC_ENDPOINT, "")
+
+    def _muc_api_endpoint(self, subpath: str) -> str:
+        return "{}{}".format(self._muc_endpoint_base, subpath)
 
     async def _oauth2_bearer_token(
         self, session: aiohttp.ClientSession, jid: str, password: str
@@ -1578,3 +1586,99 @@ class ProsodyClient:
         ) as resp:
             await self._raise_error_from_response(resp)
             resp.raise_for_status()
+
+    # MUC API Server methods (via Node.js prosodyctl shell bridge)
+
+    async def muc_list_rooms(
+        self,
+        muc_domain: str,
+    ) -> typing.List[str]:
+        """List all MUC rooms in a domain via MUC API server."""
+        if not self._muc_endpoint_base:
+            raise RuntimeError("MUC API endpoint not configured")
+
+        async with self._plain_session as session:
+            async with session.post(
+                self._muc_api_endpoint("/muc/list"),
+                json={"muc_domain": muc_domain},
+            ) as resp:
+                if resp.status != 200:
+                    err = await resp.json()
+                    raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
+                data = await resp.json()
+                return self._parse_muc_list_output(data.get("stdout", ""))
+
+    def _parse_muc_list_output(self, stdout: str) -> typing.List[str]:
+        """Parse prosodyctl shell muc:list() output."""
+        rooms: typing.List[str] = []
+        for line in stdout.strip().split("\n"):
+            line = line.strip()
+            if line and not line.startswith("|") and "@" in line:
+                rooms.append(line)
+        return rooms
+
+    async def muc_get_affiliation(
+        self,
+        room_jid: str,
+        user_jid: str,
+    ) -> typing.Optional[str]:
+        """Get user affiliation in a MUC room via MUC API server."""
+        if not self._muc_endpoint_base:
+            raise RuntimeError("MUC API endpoint not configured")
+
+        async with self._plain_session as session:
+            async with session.post(
+                self._muc_api_endpoint("/muc/get-affiliation"),
+                json={"room": room_jid, "user": user_jid},
+            ) as resp:
+                if resp.status != 200:
+                    err = await resp.json()
+                    raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
+                data = await resp.json()
+                return self._parse_affiliation_output(data.get("stdout", ""))
+
+    def _parse_affiliation_output(self, stdout: str) -> typing.Optional[str]:
+        """Parse prosodyctl shell get_affiliation() output."""
+        stdout = stdout.strip()
+        # Output format varies; look for known affiliations
+        for aff in ["owner", "admin", "member", "none", "outcast"]:
+            if aff in stdout.lower():
+                return aff
+        return None
+
+    async def muc_set_affiliation(
+        self,
+        room_jid: str,
+        user_jid: str,
+        affiliation: str,
+    ) -> bool:
+        """Set user affiliation in a MUC room via MUC API server.
+
+        Args:
+            room_jid: Full JID of the MUC room (e.g., room@groups.example.com)
+            user_jid: Full JID of the user (e.g., user@example.com)
+            affiliation: One of 'owner', 'admin', 'member', 'none', 'outcast'
+
+        Returns:
+            True if successful
+        """
+        if not self._muc_endpoint_base:
+            raise RuntimeError("MUC API endpoint not configured")
+
+        if affiliation not in ["owner", "admin", "member", "none", "outcast"]:
+            raise ValueError(f"Invalid affiliation: {affiliation}")
+
+        async with self._plain_session as session:
+            async with session.post(
+                self._muc_api_endpoint("/muc/set-affiliation"),
+                json={
+                    "room": room_jid,
+                    "user": user_jid,
+                    "affiliation": affiliation,
+                },
+            ) as resp:
+                if resp.status != 200:
+                    err = await resp.json()
+                    raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
+                data = await resp.json()
+                return data.get("ok", False)

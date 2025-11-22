@@ -73,6 +73,32 @@ make mypy                      # 型別檢查
 - `SNIKKET_WEB_PROSODY_ENDPOINT`: Prosody API URL (無尾部 /)
 - `SNIKKET_WEB_DOMAIN`: 伺服器域名
 
+選用:
+- `SNIKKET_PROSODY_MUC_ENDPOINT`: MUC API Server URL (無尾部 /)，預設為空
+
+## MUC API Server
+
+`snikket_muc_api_server.js` 是一個 Node.js 常駐服務，透過 `prosodyctl shell` 執行 MUC 相關操作。
+
+### 啟動方式
+```bash
+node snikket_muc_api_server.js  # 監聽 127.0.0.1:5999
+```
+
+### API Endpoints (POST)
+
+| Endpoint | 請求參數 | 說明 |
+|----------|---------|------|
+| `/muc/list` | `{"muc_domain": "groups.example.com"}` | 列出 MUC 房間 |
+| `/muc/get-affiliation` | `{"room": "room@groups.example.com", "user": "user@example.com"}` | 取得用戶身份 |
+| `/muc/set-affiliation` | `{"room": "...", "user": "...", "affiliation": "owner/admin/member/none/outcast"}` | 設定用戶身份 |
+
+### Python 客戶端方法 (prosodyclient.py)
+
+- `muc_list_rooms(muc_domain)` - 列出 MUC 房間
+- `muc_get_affiliation(room_jid, user_jid)` - 取得用戶在房間的身份
+- `muc_set_affiliation(room_jid, user_jid, affiliation)` - 設定用戶身份
+
 ## CI/CD
 
 GitHub Actions 執行: mypy → flake8 → 翻譯檢查 → Docker 構建
