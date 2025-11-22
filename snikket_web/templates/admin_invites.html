@@ -51,7 +51,7 @@
 				{%- call share_button("Invitation to Snikket", invite.landing_page, class="primary") -%}
 					{% trans %}Share invitation link{% endtrans %}
 				{%- endcall -%}
-				{%- call custom_form_button("remove_link", form.action_revoke.name, invite.id_, class="secondary danger", slim=True) -%}
+				{%- call custom_form_button("remove_link", form.action_revoke.name, invite.id_, class="secondary danger", slim=True, confirm=_("Are you sure you want to delete this invitation?")) -%}
 					{% trans %}Delete invitation{% endtrans %}
 				{%- endcall -%}
 			</td>

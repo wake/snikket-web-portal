@@ -28,7 +28,7 @@
 		</div>
 		{%- if muc_avatar -%}
 		<div class="f-bbox">
-			{%- call form_button("delete", form.action_delete_avatar, class="secondary danger") %}{% endcall -%}
+			{%- call form_button("delete", form.action_delete_avatar, class="secondary danger", confirm=_("Are you sure you want to remove the avatar?")) %}{% endcall -%}
 		</div>
 		{%- endif -%}
 	</div>
@@ -64,7 +64,7 @@
 				</select>
 			</td>
 			<td class="nowrap">
-				{%- call custom_form_button("remove_user", form.action_remove_member.name, localpart, class="primary danger", slim=True) -%}
+				{%- call custom_form_button("remove_user", form.action_remove_member.name, localpart, class="primary danger", slim=True, confirm=_("Are you sure you want to remove this manager?")) -%}
 					{% trans username=localpart %}Remove {{ username }} from managers{% endtrans %}
 				{%- endcall -%}
 			</td>

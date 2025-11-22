@@ -55,11 +55,11 @@
 <a href="{{ href }}" class="button {% if class %}{{ class }}{% endif %}" {% if onclick %} onclick="{{ onclick }}"{% endif %}>{% call icon(icon_name) %}{% endcall %}<span>{{ label }}</span></a>
 {%- endmacro %}
 
-{% macro form_button(icon_name, button_obj, caller=None, class=None) -%}
-<button {% if class %}class="{{ class }}"{% endif %} id="{{ button_obj.id }}" name="{{ button_obj.name }}" type="submit" value="{{ button_obj.data or 'true' }}">{% call icon(icon_name) %}{% endcall %}<span>{{ button_obj.label.text }}</span></button>
+{% macro form_button(icon_name, button_obj, caller=None, class=None, confirm=None) -%}
+<button {% if class %}class="{{ class }}"{% endif %} id="{{ button_obj.id }}" name="{{ button_obj.name }}" type="submit" value="{{ button_obj.data or 'true' }}"{% if confirm %} onclick="return confirm('{{ confirm }}')"{% endif %}>{% call icon(icon_name) %}{% endcall %}<span>{{ button_obj.label.text }}</span></button>
 {%- endmacro %}
 
-{% macro custom_form_button(icon_name, name, value, caller=None, slim=False, class=None) -%}
+{% macro custom_form_button(icon_name, name, value, caller=None, slim=False, class=None, confirm=None) -%}
 {%- set text = caller() -%}
 <button
 	{% if class %}class="{{ class }}"{% endif %}
@@ -69,6 +69,9 @@
 {% if slim %}
 	aria-label="{{ text }}"
 	title="{{ text }}"
+{% endif %}
+{% if confirm %}
+	onclick="return confirm('{{ confirm }}')"
 {% endif %}
 >
 	{%- call icon(icon_name) %}{% endcall -%}
