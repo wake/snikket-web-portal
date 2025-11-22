@@ -74,7 +74,7 @@ make mypy                      # 型別檢查
 - `SNIKKET_WEB_DOMAIN`: 伺服器域名
 
 選用:
-- `SNIKKET_PROSODY_MUC_ENDPOINT`: MUC API Server URL (無尾部 /)，預設為空
+- `SNIKKET_WEB_PROSODY_MUC_ENDPOINT`: MUC API Server URL (無尾部 /)，預設為空
 
 ## MUC API Server
 
@@ -102,3 +102,79 @@ node snikket_muc_api_server.js  # 監聽 127.0.0.1:5999
 ## CI/CD
 
 GitHub Actions 執行: mypy → flake8 → 翻譯檢查 → Docker 構建
+
+## 開發注意事項
+
+### Template Macro 用法
+
+`library.j2` 提供常用的 macro：
+
+```jinja2
+{# 標準表單按鈕 #}
+{% call form_button("icon", form.action, class="primary", confirm="確認訊息?") %}{% endcall %}
+
+{# 自訂表單按鈕 (用於內聯刪除等) #}
+{% call custom_form_button("icon", name, value, class="danger", slim=True, confirm="確認?") %}
+    按鈕文字
+{% endcall %}
+```
+
+- `confirm` 參數：加入 JavaScript confirm() 確認對話框
+- `slim=True`：只顯示圖示，文字作為 tooltip
+- `class="danger"`：危險操作的視覺提示
+
+### 表單驗證注意事項
+
+當一個表單有多個 action（如 save、delete、add_member 等）時：
+- 使用 `form.validate_on_submit()` 會驗證所有必填欄位
+- 若某些 action 不需要完整驗證，需先檢查 `request.method == "POST"` 和具體的 action
+
+範例（`edit_circle_chat` 路由）：
+```python
+if request.method == "POST":
+    # 不需要完整驗證的 action
+    if form.action_add_manager.data:
+        # 處理新增管理員
+        return redirect(...)
+
+    # 需要完整驗證的 action
+    elif form.validate_on_submit():
+        if form.action_save.data:
+            # 處理儲存
+```
+
+### Circle 與 Chat 的成員管理
+
+- **Circle 成員**：透過 Prosody Admin API 管理
+- **Chat 管理員**：透過 MUC API Server 管理（owner/admin 角色）
+- 聊天群組的管理員只能從該 Circle 的成員中選擇
+- 新增聊天群組時會自動將建立者設為 owner
+
+### Prosody API 回應處理
+
+Prosody Admin API 有時回傳空內容或非 JSON：
+```python
+async with session.post(...) as resp:
+    await self._raise_error_from_response(resp)
+    content_type = resp.headers.get("Content-Type", "")
+    if "application/json" in content_type:
+        return SomeClass.from_api_response(await resp.json())
+    return None
+```
+
+### 除錯日誌
+
+開發時可使用 `dev.log` 記錄除錯資訊：
+```python
+import logging
+dev_logger = logging.getLogger("dev")
+dev_logger.setLevel(logging.DEBUG)
+if not dev_logger.handlers:
+    fh = logging.FileHandler("dev.log")
+    fh.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    dev_logger.addHandler(fh)
+
+dev_logger.info("訊息")
+```
+
+注意：`dev.log` 不應提交到版本控制。
