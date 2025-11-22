@@ -5,3 +5,4 @@ __pycache__
 /snikket_web/translations/*/LC_MESSAGES/*.mo
 /.env
 /venv
+/.claude/settings.local.json
