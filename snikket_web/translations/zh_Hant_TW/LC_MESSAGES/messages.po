@@ -547,7 +547,7 @@ msgstr "管理人員群組"
 msgid ""
 "<em>Circles</em> aim to help people who are in the same social circle find "
 "each other on your service."
-msgstr "<em>人員群組</em> 旨在幫助處於同一社交圈的人在您的服務中互相找到。"
+msgstr "<em>人員群組 (社交群組)</em> 旨在幫助處於同一社交圈的人在您的服務中互相找到。"
 
 #: snikket_web/templates/admin_circles.html:6
 msgid ""
@@ -555,7 +555,7 @@ msgid ""
 "In addition, each circle may have group chats where the circle members are "
 "included."
 msgstr ""
-"在同一個群組裡的使用者將在他們的聯絡人清單中看到彼此。此外，每個人員群組還有聊天群組，"
+"在同一個人員群組裡的使用者將在他們的聯絡人清單中看到彼此。此外，每個人員群組還有聊天群組，"
 "群組成員也包括在內。"
 
 #: snikket_web/templates/admin_circles.html:13
