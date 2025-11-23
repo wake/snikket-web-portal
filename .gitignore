@@ -6,3 +6,4 @@ __pycache__
 /.env
 /venv
 /.claude/settings.local.json
+/dev.log
