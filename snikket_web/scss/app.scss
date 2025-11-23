@@ -71,7 +71,8 @@ main {
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: $w-s2 0em;
-	padding-left: 2em;
+	padding-left: 1.7em;
+  display: inline-block;
 }
 
 div#topbar {
@@ -87,7 +88,7 @@ div#topbar {
 		flex: 0 1 auto;
 		color: #333;
 		font-size: $_top-h-size;
-		line-height: 1.5;
+		line-height: 1.5  ;
 
 		body.debug & {
 			color: red;
@@ -100,7 +101,7 @@ div#topbar {
 		& > a {
 			color: inherit;
 			text-decoration: none;
-      line-height: 1em;
+      line-height: 1.1em;
 
 			span {
 				@include snikket-logo;
