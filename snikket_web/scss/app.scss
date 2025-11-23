@@ -735,7 +735,12 @@ input[type="submit"], button, .button {
 		color: $gray-900;
 		content: attr(data-avatar-char);
 	}
+
+  & > img.avatar {
+    width: 100%;
+  }
 }
+
 
 nav.usermenu > .avatar {
 	/* we can increase the size to the size of the h1 here */
