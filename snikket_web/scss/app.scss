@@ -85,7 +85,7 @@ div#topbar {
 
 	& > header {
 		flex: 0 1 auto;
-		color: black;
+		color: #333;
 		font-size: $_top-h-size;
 		line-height: 1.5;
 
@@ -100,6 +100,7 @@ div#topbar {
 		& > a {
 			color: inherit;
 			text-decoration: none;
+      line-height: 1em;
 
 			span {
 				@include snikket-logo;
@@ -754,7 +755,7 @@ body#login {
 
 	h1 {
 		@include snikket-logo;
-		padding-left: 2em;
+		padding-left: 1.8em;
 		background-position: 0 0em;
 	}
 }
