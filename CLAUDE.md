@@ -43,6 +43,7 @@ make mypy                      # 型別檢查
 
 ### 核心模組
 - `prosodyclient.py` (1495 行): Prosody HTTP API 客戶端，處理所有後端通訊
+- `muc_shell.py`: MUC 操作模組，直接透過 `docker exec prosodyctl shell` 執行
 - `xmpputil.py`: XMPP 工具 (JID 解析等)
 - `infra.py`: 基礎設施 (Babel i18n、認證客戶端)
 - `colour.py`: XEP-0392 頭像顏色生成
@@ -74,30 +75,40 @@ make mypy                      # 型別檢查
 - `SNIKKET_WEB_DOMAIN`: 伺服器域名
 
 選用:
-- `SNIKKET_WEB_PROSODY_MUC_ENDPOINT`: MUC API Server URL (無尾部 /)，預設為空
+- `SNIKKET_WEB_PROSODY_MUC_ENDPOINT`: MUC API Server URL (無尾部 /)，已停用
 
-## MUC API Server
+## MUC 操作
 
-`snikket_muc_api_server.js` 是一個 Node.js 常駐服務，透過 `prosodyctl shell` 執行 MUC 相關操作。
+### 目前實作：muc_shell.py (Python 直接執行)
 
-### 啟動方式
+MUC 操作現在透過 `muc_shell.py` 模組直接執行 `docker exec snikket prosodyctl shell`，不需要額外的 Node.js 服務。
+
+**前提條件**：Web Portal 必須與 Snikket Docker 容器在同一台主機上執行。
+
+**提供的函式**：
+- `muc_list_rooms(muc_domain)` - 列出 MUC 房間
+- `muc_get_affiliation(room_jid, user_jid)` - 取得用戶在房間的身份
+- `muc_set_affiliation(room_jid, user_jid, affiliation)` - 設定用戶身份
+
+**prosodyclient.py 整合**：
+`ProsodyClient` 類別的 MUC 方法內部呼叫 `muc_shell` 模組，保持 API 不變。
+
+### 備用方案：snikket_muc_api_server.js (Node.js HTTP API)
+
+若需要將 Web Portal 與 Docker host 分離部署，可使用 Node.js API Server：
+
 ```bash
 node snikket_muc_api_server.js  # 監聽 127.0.0.1:5999
 ```
 
-### API Endpoints (POST)
-
+API Endpoints (POST)：
 | Endpoint | 請求參數 | 說明 |
 |----------|---------|------|
 | `/muc/list` | `{"muc_domain": "groups.example.com"}` | 列出 MUC 房間 |
 | `/muc/get-affiliation` | `{"room": "room@groups.example.com", "user": "user@example.com"}` | 取得用戶身份 |
 | `/muc/set-affiliation` | `{"room": "...", "user": "...", "affiliation": "owner/admin/member/none/outcast"}` | 設定用戶身份 |
 
-### Python 客戶端方法 (prosodyclient.py)
-
-- `muc_list_rooms(muc_domain)` - 列出 MUC 房間
-- `muc_get_affiliation(room_jid, user_jid)` - 取得用戶在房間的身份
-- `muc_set_affiliation(room_jid, user_jid, affiliation)` - 設定用戶身份
+若要回退到 HTTP API，需在 `prosodyclient.py` 中取消註解原本的 HTTP 呼叫程式碼。
 
 ## CI/CD
 
@@ -146,7 +157,7 @@ if request.method == "POST":
 ### Circle 與 Chat 的成員管理
 
 - **Circle 成員**：透過 Prosody Admin API 管理
-- **Chat 管理員**：透過 MUC API Server 管理（owner/admin 角色）
+- **Chat 管理員**：透過 `muc_shell.py` 管理（owner/admin 角色）
 - 聊天群組的管理員只能從該 Circle 的成員中選擇
 - 新增聊天群組時會自動將建立者設為 owner
 

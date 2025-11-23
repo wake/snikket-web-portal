@@ -31,7 +31,7 @@ from flask import g as _app_ctx_stack
 
 import werkzeug.exceptions
 
-from . import xmpputil, _version
+from . import xmpputil, _version, muc_shell
 from .xmpputil import split_jid
 
 
@@ -1601,20 +1601,24 @@ class ProsodyClient:
         self,
         muc_domain: str,
     ) -> typing.List[str]:
-        """List all MUC rooms in a domain via MUC API server."""
-        if not self._muc_endpoint_base:
-            raise RuntimeError("MUC API endpoint not configured")
+        """List all MUC rooms in a domain via prosodyctl shell."""
+        # 直接透過 muc_shell 模組執行
+        return await muc_shell.muc_list_rooms(muc_domain)
 
-        async with self._plain_session as session:
-            async with session.post(
-                self._muc_api_endpoint("/muc/list"),
-                json={"muc_domain": muc_domain},
-            ) as resp:
-                if resp.status != 200:
-                    err = await resp.json()
-                    raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
-                data = await resp.json()
-                return self._parse_muc_list_output(data.get("stdout", ""))
+        # --- 原本的 HTTP API 呼叫 (已停用) ---
+        # if not self._muc_endpoint_base:
+        #     raise RuntimeError("MUC API endpoint not configured")
+        #
+        # async with self._plain_session as session:
+        #     async with session.post(
+        #         self._muc_api_endpoint("/muc/list"),
+        #         json={"muc_domain": muc_domain},
+        #     ) as resp:
+        #         if resp.status != 200:
+        #             err = await resp.json()
+        #             raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
+        #         data = await resp.json()
+        #         return self._parse_muc_list_output(data.get("stdout", ""))
 
     def _parse_muc_list_output(self, stdout: str) -> typing.List[str]:
         """Parse prosodyctl shell muc:list() output."""
@@ -1630,20 +1634,24 @@ class ProsodyClient:
         room_jid: str,
         user_jid: str,
     ) -> typing.Optional[str]:
-        """Get user affiliation in a MUC room via MUC API server."""
-        if not self._muc_endpoint_base:
-            raise RuntimeError("MUC API endpoint not configured")
+        """Get user affiliation in a MUC room via prosodyctl shell."""
+        # 直接透過 muc_shell 模組執行
+        return await muc_shell.muc_get_affiliation(room_jid, user_jid)
 
-        async with self._plain_session as session:
-            async with session.post(
-                self._muc_api_endpoint("/muc/get-affiliation"),
-                json={"room": room_jid, "user": user_jid},
-            ) as resp:
-                if resp.status != 200:
-                    err = await resp.json()
-                    raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
-                data = await resp.json()
-                return self._parse_affiliation_output(data.get("stdout", ""))
+        # --- 原本的 HTTP API 呼叫 (已停用) ---
+        # if not self._muc_endpoint_base:
+        #     raise RuntimeError("MUC API endpoint not configured")
+        #
+        # async with self._plain_session as session:
+        #     async with session.post(
+        #         self._muc_api_endpoint("/muc/get-affiliation"),
+        #         json={"room": room_jid, "user": user_jid},
+        #     ) as resp:
+        #         if resp.status != 200:
+        #             err = await resp.json()
+        #             raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
+        #         data = await resp.json()
+        #         return self._parse_affiliation_output(data.get("stdout", ""))
 
     def _parse_affiliation_output(self, stdout: str) -> typing.Optional[str]:
         """Parse prosodyctl shell get_affiliation() output."""
@@ -1660,7 +1668,7 @@ class ProsodyClient:
         user_jid: str,
         affiliation: str,
     ) -> bool:
-        """Set user affiliation in a MUC room via MUC API server.
+        """Set user affiliation in a MUC room via prosodyctl shell.
 
         Args:
             room_jid: Full JID of the MUC room (e.g., room@groups.example.com)
@@ -1670,23 +1678,27 @@ class ProsodyClient:
         Returns:
             True if successful
         """
-        if not self._muc_endpoint_base:
-            raise RuntimeError("MUC API endpoint not configured")
+        # 直接透過 muc_shell 模組執行
+        return await muc_shell.muc_set_affiliation(room_jid, user_jid, affiliation)
 
-        if affiliation not in ["owner", "admin", "member", "none", "outcast"]:
-            raise ValueError(f"Invalid affiliation: {affiliation}")
-
-        async with self._plain_session as session:
-            async with session.post(
-                self._muc_api_endpoint("/muc/set-affiliation"),
-                json={
-                    "room": room_jid,
-                    "user": user_jid,
-                    "affiliation": affiliation,
-                },
-            ) as resp:
-                if resp.status != 200:
-                    err = await resp.json()
-                    raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
-                data = await resp.json()
-                return data.get("ok", False)
+        # --- 原本的 HTTP API 呼叫 (已停用) ---
+        # if not self._muc_endpoint_base:
+        #     raise RuntimeError("MUC API endpoint not configured")
+        #
+        # if affiliation not in ["owner", "admin", "member", "none", "outcast"]:
+        #     raise ValueError(f"Invalid affiliation: {affiliation}")
+        #
+        # async with self._plain_session as session:
+        #     async with session.post(
+        #         self._muc_api_endpoint("/muc/set-affiliation"),
+        #         json={
+        #             "room": room_jid,
+        #             "user": user_jid,
+        #             "affiliation": affiliation,
+        #         },
+        #     ) as resp:
+        #         if resp.status != 200:
+        #             err = await resp.json()
+        #             raise RuntimeError(f"MUC API error: {err.get('error', 'unknown')}")
+        #         data = await resp.json()
+        #         return data.get("ok", False)
