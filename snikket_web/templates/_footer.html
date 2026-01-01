@@ -6,8 +6,8 @@
 		<li>{% trans %}"Snikket" and the parrot logo are trademarks of Snikket Community Interest Company.{% endtrans %}</li>
 		{#- -#}
 	</ul>
-	<div class="language-dropdown footer">
-		<button type="button" class="language-toggle" onclick="this.parentElement.classList.toggle('open')">
+	<div class="language-dropdown footer" id="lang-dropdown-footer">
+		<button type="button" class="language-toggle" aria-expanded="false" aria-haspopup="true">
 			{{ lang | language_name }}
 		</button>
 		<ul class="language-menu">
@@ -17,3 +17,43 @@
 		</ul>
 	</div>
 </footer>
+<script>
+(function() {
+	// Language dropdown toggle (Bootstrap-style)
+	document.querySelectorAll('.language-dropdown .language-toggle').forEach(function(btn) {
+		btn.addEventListener('click', function(e) {
+			e.stopPropagation();
+			var dropdown = this.parentElement;
+			var isOpen = dropdown.classList.contains('open');
+			// Close all dropdowns first
+			document.querySelectorAll('.language-dropdown.open').forEach(function(d) {
+				d.classList.remove('open');
+				d.querySelector('.language-toggle').setAttribute('aria-expanded', 'false');
+			});
+			// Toggle current dropdown
+			if (!isOpen) {
+				dropdown.classList.add('open');
+				this.setAttribute('aria-expanded', 'true');
+			}
+		});
+	});
+	// Close dropdown when clicking outside
+	document.addEventListener('click', function(e) {
+		if (!e.target.closest('.language-dropdown')) {
+			document.querySelectorAll('.language-dropdown.open').forEach(function(d) {
+				d.classList.remove('open');
+				d.querySelector('.language-toggle').setAttribute('aria-expanded', 'false');
+			});
+		}
+	});
+	// Close dropdown on Escape key
+	document.addEventListener('keydown', function(e) {
+		if (e.key === 'Escape') {
+			document.querySelectorAll('.language-dropdown.open').forEach(function(d) {
+				d.classList.remove('open');
+				d.querySelector('.language-toggle').setAttribute('aria-expanded', 'false');
+			});
+		}
+	});
+})();
+</script>

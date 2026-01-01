@@ -5,8 +5,8 @@
 	<header><a href="{{ url_for('.index') }}"><span>{{ config["SITE_NAME"] }}</span></a></header>
 	{% block topbar_left %}{% endblock %}
 	<div class="filler"></div>
-	<div class="language-dropdown">
-		<button type="button" class="language-toggle" onclick="this.parentElement.classList.toggle('open')">
+	<div class="language-dropdown" id="lang-dropdown-topbar">
+		<button type="button" class="language-toggle" aria-expanded="false" aria-haspopup="true">
 			{{ lang | language_name }}
 		</button>
 		<ul class="language-menu">
