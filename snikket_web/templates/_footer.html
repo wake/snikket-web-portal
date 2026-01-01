@@ -1,21 +1,23 @@
 <footer>
 	<ul>
 		{#- -#}
-		<li>{% trans about_url=url_for('main.about') %}A <a href="{{ about_url }}">Snikket</a> service{% endtrans %}</li>
+		<li class="service-info">
+			{% trans about_url=url_for('main.about') %}A <a href="{{ about_url }}">Snikket</a> service{% endtrans %}
+			<div class="language-dropdown footer" id="lang-dropdown-footer">
+				<button type="button" class="language-toggle" aria-expanded="false" aria-haspopup="true">
+					{{ lang | language_name }}
+				</button>
+				<ul class="language-menu">
+					{%- for code in config.LANGUAGES -%}
+					<li><a href="/set-language/{{ code }}?next={{ request.path | urlencode }}" {% if code == lang %}class="active"{% endif %}>{{ code | language_name }}</a></li>
+					{%- endfor -%}
+				</ul>
+			</div>
+		</li>
 		{#- -#}
 		<li>{% trans %}"Snikket" and the parrot logo are trademarks of Snikket Community Interest Company.{% endtrans %}</li>
 		{#- -#}
 	</ul>
-	<div class="language-dropdown footer" id="lang-dropdown-footer">
-		<button type="button" class="language-toggle" aria-expanded="false" aria-haspopup="true">
-			{{ lang | language_name }}
-		</button>
-		<ul class="language-menu">
-			{%- for code in config.LANGUAGES -%}
-			<li><a href="/set-language/{{ code }}?next={{ request.path | urlencode }}" {% if code == lang %}class="active"{% endif %}>{{ code | language_name }}</a></li>
-			{%- endfor -%}
-		</ul>
-	</div>
 </footer>
 <script>
 (function() {

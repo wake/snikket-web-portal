@@ -301,6 +301,14 @@ body > footer {
 	li {
 		display: block;
 		margin: $w-s1 0;
+
+		&.service-info {
+			display: inline-flex;
+			align-items: center;
+			gap: $w-s2;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
 	}
 
 	a, a:visited, a:hover, a:active, a:focus {
@@ -318,8 +326,8 @@ body > footer {
 	}
 
 	.language-dropdown {
-		text-align: center;
-		padding: $w-s1 0;
+		display: inline-block;
+		vertical-align: middle;
 	}
 }
 
