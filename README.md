@@ -55,6 +55,11 @@ This fork adds the following features to the original Snikket Web Portal.
 - Confirmation dialogs for destructive actions
 - Administrators column in circle chat table
 
+### Customization
+
+- Custom logo via `SNIKKET_WEB_CUSTOM_LOGO` environment variable
+- Custom favicon via `SNIKKET_WEB_CUSTOM_FAVICON` environment variable
+
 ---
 
 # Snikket Web Portal（中文版）
@@ -107,3 +112,8 @@ $ quart run
 
 - 刪除/移除操作前的確認對話框
 - Circle 聊天表格顯示管理員欄位
+
+### 客製化
+
+- 自訂 Logo：設定 `SNIKKET_WEB_CUSTOM_LOGO` 環境變數
+- 自訂 Favicon：設定 `SNIKKET_WEB_CUSTOM_FAVICON` 環境變數
