@@ -3,7 +3,14 @@
 		{#- -#}
 		<li>{% trans about_url=url_for('main.about') %}A <a href="{{ about_url }}">Snikket</a> service{% endtrans %}</li>
 		{#- -#}
-		<li>{% trans %}“Snikket” and the parrot logo are trademarks of Snikket Community Interest Company.{% endtrans %}</li>
+		<li>{% trans %}"Snikket" and the parrot logo are trademarks of Snikket Community Interest Company.{% endtrans %}</li>
 		{#- -#}
 	</ul>
+	<div class="language-selector">
+		<select onchange="window.location.href='/set-language/' + this.value + '?next=' + encodeURIComponent(window.location.pathname + window.location.search)">
+			{%- for code in config.LANGUAGES -%}
+			<option value="{{ code }}" {% if code == lang %}selected{% endif %}>{{ code }}</option>
+			{%- endfor -%}
+		</select>
+	</div>
 </footer>

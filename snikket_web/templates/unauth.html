@@ -5,6 +5,13 @@
 	<header><a href="{{ url_for('.index') }}"><span>{{ config["SITE_NAME"] }}</span></a></header>
 	{% block topbar_left %}{% endblock %}
 	<div class="filler"></div>
+	<div class="topbar-language">
+		<select onchange="window.location.href='/set-language/' + this.value + '?next=' + encodeURIComponent(window.location.pathname + window.location.search)">
+			{%- for code in config.LANGUAGES -%}
+			<option value="{{ code }}" {% if code == lang %}selected{% endif %}>{{ code }}</option>
+			{%- endfor -%}
+		</select>
+	</div>
 	{% block topbar_right %}{% endblock %}
 </div>
 <div id="mwrap">

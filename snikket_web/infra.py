@@ -39,6 +39,11 @@ BYTE_UNIT_SCALE_MAP = [
 @babel.localeselector  # type:ignore
 def selected_locale() -> str:
     g.language_header_accessed = True
+    # Check cookie first for user's language preference
+    lang_cookie = request.cookies.get('snikket_language')
+    if lang_cookie and lang_cookie in current_app.config['LANGUAGES']:
+        return lang_cookie
+    # Fall back to browser Accept-Language header
     selected = request.accept_languages.best_match(
         current_app.config['LANGUAGES']
     ) or current_app.config['LANGUAGES'][0]

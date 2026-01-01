@@ -54,6 +54,21 @@ async def index() -> werkzeug.Response:
     return redirect(url_for("index"))
 
 
+@bp.route("/set-language/<lang>")
+async def set_language(lang: str) -> quart.Response:
+    if lang not in current_app.config['LANGUAGES']:
+        lang = 'en'
+    next_url = request.args.get('next') or request.referrer or url_for('.index')
+    resp = redirect(next_url)
+    resp.set_cookie(
+        'snikket_language',
+        lang,
+        max_age=365 * 24 * 60 * 60,
+        samesite='Lax'
+    )
+    return resp
+
+
 ERR_CREDENTIALS_INVALID = _l("Invalid username or password.")
 
 
