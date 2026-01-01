@@ -48,6 +48,7 @@ This fork adds the following features to the original Snikket Web Portal.
 ### Internationalization
 
 - Traditional Chinese (zh_Hant_TW) translation
+- Language switcher in topbar and footer
 
 ### UI Improvements
 
@@ -100,6 +101,7 @@ $ quart run
 ### 國際化
 
 - 繁體中文 (zh_Hant_TW) 翻譯
+- 頂部導覽列與頁尾語系切換器
 
 ### 介面改善
 
