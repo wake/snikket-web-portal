@@ -34,6 +34,26 @@ configuration purposes.
 
 For a (non-productive) example of such a file, see `example.env.py`.
 
+## Fork Features
+
+This fork adds the following features to the original Snikket Web Portal.
+
+### Group Chat Management
+
+- Edit group chat name and avatar
+- Manage member affiliations (owner, admin, member, none)
+- Block/unblock users from group chats
+- View affiliation descriptions with XEP-0045 specification link
+
+### Internationalization
+
+- Traditional Chinese (zh_Hant_TW) translation
+
+### UI Improvements
+
+- Confirmation dialogs for destructive actions
+- Administrators column in circle chat table
+
 ---
 
 # Snikket Web Portal（中文版）
@@ -66,50 +86,22 @@ $ quart run
 
 範例檔案（非正式環境用）請參閱 `example.env.py`。
 
----
-
-# Fork Features / 分支新增功能
-
-This fork adds the following features to the original Snikket Web Portal.
+## 分支新增功能
 
 此分支在原版 Snikket Web Portal 基礎上新增以下功能。
 
-## Group Chat Management / 群組聊天管理
-
-- Edit group chat name and avatar
-- Manage member affiliations (owner, admin, member, none)
-- Block/unblock users from group chats
-- View affiliation descriptions with XEP-0045 specification link
-
----
+### 群組聊天管理
 
 - 編輯群組聊天名稱與頭像
 - 管理成員身份（擁有者、管理員、成員、預設）
 - 封鎖/解除封鎖群組聊天用戶
 - 查看身份說明與 XEP-0045 規範連結
 
-## Internationalization / 國際化
-
-- Traditional Chinese (zh_Hant_TW) translation
-
----
+### 國際化
 
 - 繁體中文 (zh_Hant_TW) 翻譯
 
-## UI Improvements / 介面改善
-
-- Confirmation dialogs for destructive actions
-- Administrators column in circle chat table
-
----
+### 介面改善
 
 - 刪除/移除操作前的確認對話框
 - Circle 聊天表格顯示管理員欄位
-
-## Technical / 技術實作
-
-- `muc_shell.py` - Direct MUC operations via `prosodyctl shell` (no Node.js dependency)
-
----
-
-- `muc_shell.py` - 透過 `prosodyctl shell` 直接執行 MUC 操作（無需 Node.js）
