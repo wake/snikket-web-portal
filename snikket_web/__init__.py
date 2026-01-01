@@ -183,6 +183,8 @@ class AppConfig:
     privacy_uri = environ.var("")
     abuse_email = environ.var("")
     security_email = environ.var("")
+    custom_logo = environ.var("")
+    custom_favicon = environ.var("")
 
 
 _UPPER_CASE = "".join(map(chr, range(ord("A"), ord("Z")+1)))
@@ -220,6 +222,8 @@ def create_app() -> quart.Quart:
     app.config["ABUSE_EMAIL"] = config.abuse_email
     app.config["SECURITY_EMAIL"] = config.security_email
     app.config["PROSODY_MUC_ENDPOINT"] = config.prosody_muc_endpoint
+    app.config["CUSTOM_LOGO"] = config.custom_logo
+    app.config["CUSTOM_FAVICON"] = config.custom_favicon
     app.config["SESSION_COOKIE_SECURE"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
