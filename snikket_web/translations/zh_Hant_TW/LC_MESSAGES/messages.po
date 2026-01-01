@@ -310,7 +310,7 @@ msgstr "該使用者名稱已被使用。"
 
 #: snikket_web/invite.py:166 snikket_web/invite.py:235
 msgid "Registration was declined for unknown reasons."
-msgstr "由於未知原因而拒絕了注冊。"
+msgstr "由於未知原因而拒絕了註冊。"
 
 #: snikket_web/invite.py:170
 msgid "The username is not valid."
@@ -446,7 +446,7 @@ msgstr "一個 <a href=\"%(about_url)s\">Snikket</a> 服務"
 msgid ""
 "“Snikket” and the parrot logo are trademarks of Snikket Community Interest "
 "Company."
-msgstr "“Snikket” 和鸚鵡標志是 Snikket Community Interest Company 的商標。"
+msgstr "「Snikket」和鸚鵡標誌是 Snikket Community Interest Company 的商標。"
 
 #: snikket_web/templates/about.html:4
 msgid "About Snikket"
@@ -523,7 +523,7 @@ msgid ""
 "Company. For more information about the trademarks, visit the <a href="
 "\"%(trademarks_url)s\">Snikket Trademarks information page</a>."
 msgstr ""
-"“Snikket” 和鸚鵡標志是 Snikket Community Interest Company 的商標。有關商標的"
+"「Snikket」和鸚鵡標誌是 Snikket Community Interest Company 的商標。有關商標的"
 "更多資訊，請訪問 <a href=\"%(trademarks_url)s\">Snikket 商標資訊頁</a>。"
 
 #: snikket_web/templates/about.html:23
@@ -1415,12 +1415,12 @@ msgstr "抱歉，此邀請連結似乎已過期！"
 #: snikket_web/templates/invite_register.html:5
 #, python-format
 msgid "Register on %(site_name)s | Snikket"
-msgstr "在 %(site_name)s 注冊 | Snikket"
+msgstr "在 %(site_name)s 註冊 | Snikket"
 
 #: snikket_web/templates/invite_register.html:9
 #, python-format
 msgid "Register on %(site_name)s"
-msgstr "在 %(site_name)s 注冊"
+msgstr "在 %(site_name)s 註冊"
 
 #: snikket_web/templates/invite_register.html:11
 #, python-format
@@ -1439,7 +1439,7 @@ msgid ""
 "by clicking on the button below:"
 msgstr ""
 "建立帳號將允許使用 Snikket App或兼容軟體與其他人進行交流。如果您已經安裝了應"
-"用，我們建議您點擊下方按鈕後在App內完成帳號注冊流程："
+"用，我們建議您點擊下方按鈕後在App內完成帳號註冊流程："
 
 #: snikket_web/templates/invite_register.html:14
 #: snikket_web/templates/invite_view.html:46
@@ -1468,7 +1468,7 @@ msgid ""
 "If you plan to use a legacy XMPP client, you can register an account online "
 "and enter your credentials into any XMPP-compatible software."
 msgstr ""
-"如果您打算使用傳統的 XMPP 客戶端，可以在線注冊帳號，在任何兼容 XMPP 的軟體中"
+"如果您打算使用傳統的 XMPP 客戶端，可以在線註冊帳號，在任何兼容 XMPP 的軟體中"
 "輸入您的憑據。"
 
 #: snikket_web/templates/invite_register.html:27
@@ -1570,18 +1570,18 @@ msgstr ""
 #: snikket_web/templates/invite_success.html:5
 #, python-format
 msgid "Successfully registered on %(site_name)s | Snikket"
-msgstr "已在 %(site_name)s 成功注冊 | Snikket"
+msgstr "已在 %(site_name)s 成功註冊 | Snikket"
 
 #: snikket_web/templates/invite_success.html:10
 #, python-format
 msgid "Successfully registered on %(site_name)s"
-msgstr "已在 %(site_name)s 成功注冊"
+msgstr "已在 %(site_name)s 成功註冊"
 
 #: snikket_web/templates/invite_success.html:12
 #, python-format
 msgid ""
 "Congratulations! You successfully registered on %(site_name)s as %(jid)s."
-msgstr "恭喜！您已在 %(site_name)s 成功注冊了帳號 %(jid)s 。"
+msgstr "恭喜！您已在 %(site_name)s 成功註冊了帳號 %(jid)s 。"
 
 #: snikket_web/templates/invite_success.html:13
 msgid "Your address"
@@ -1596,7 +1596,7 @@ msgstr "複製地址"
 msgid ""
 "You can now set up your legacy XMPP client with the above address and the "
 "password you chose during registration."
-msgstr "您現在可以使用上方地址和注冊時選擇的密碼設定傳統 XMPP 客戶端。"
+msgstr "您現在可以使用上方地址和註冊時選擇的密碼設定傳統 XMPP 客戶端。"
 
 #: snikket_web/templates/invite_success.html:18
 #, python-format
@@ -1714,7 +1714,7 @@ msgid ""
 "\">register an account manually</a>."
 msgstr ""
 "您可以使用任何兼容 XMPP 的軟體連接到 Snikket。如果上方按鈕不適用於您的App，"
-"您可能需要 <a href=\"%(register_url)s\">手動注冊帳號</a>。"
+"您可能需要 <a href=\"%(register_url)s\">手動註冊帳號</a>。"
 
 #: snikket_web/templates/invite_view.html:59
 msgid "Scan invite code"
