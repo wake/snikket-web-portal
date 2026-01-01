@@ -124,7 +124,7 @@
 		<div class="select-wrap">{{ form.user_to_block }}</div>
 	</div>
 	<div class="f-bbox">
-		{%- call form_button("block", form.action_block_user, class="primary danger", confirm=_("Are you sure you want to block this user?")) %}{% endcall -%}
+		{%- call form_button("lock", form.action_block_user, class="primary danger", confirm=_("Are you sure you want to block this user?")) %}{% endcall -%}
 	</div>
 </div>
 </form>
@@ -146,7 +146,7 @@
 		<tr>
 			<td>{{ localpart }}</td>
 			<td class="nowrap">
-				{%- call custom_form_button("unlock", form.action_unblock_user.name, localpart, class="primary", slim=True, confirm=_("Are you sure you want to unblock this user?")) -%}
+				{%- call custom_form_button("lock_open", form.action_unblock_user.name, localpart, class="primary", slim=True, confirm=_("Are you sure you want to unblock this user?")) -%}
 					{% trans username=localpart %}Unblock {{ username }}{% endtrans %}
 				{%- endcall -%}
 			</td>
