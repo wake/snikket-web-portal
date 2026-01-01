@@ -48,12 +48,7 @@ This fork adds the following features to the original Snikket Web Portal.
 ### Internationalization
 
 - Traditional Chinese (zh_Hant_TW) translation
-- Language switcher (Bootstrap-style dropdown)
-  - Located in topbar and footer (next to "A Snikket service")
-  - Cookie-based preference storage (1 year expiry)
-  - Falls back to browser Accept-Language header
-  - Click outside or press Escape to close
-  - Shows native language names (e.g., "Deutsch", "日本語")
+- Language switcher in topbar and footer (cookie-based, falls back to browser setting)
 
 ### UI Improvements
 
@@ -106,12 +101,7 @@ $ quart run
 ### 國際化
 
 - 繁體中文 (zh_Hant_TW) 翻譯
-- 語系切換器（Bootstrap 風格下拉選單）
-  - 位於頂部導覽列與頁尾（「一個 Snikket 服務」旁）
-  - 使用 Cookie 儲存語言偏好（有效期 1 年）
-  - 預設依照瀏覽器 Accept-Language 設定
-  - 點擊外部或按 Escape 鍵關閉選單
-  - 顯示語言原生名稱（如「Deutsch」、「繁體中文」）
+- 語系切換器（Cookie 儲存，預設依照瀏覽器設定）
 
 ### 介面改善
 
