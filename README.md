@@ -68,72 +68,48 @@ $ quart run
 
 ---
 
-# Changelog / 更新日誌
+# Fork Features / 分支新增功能
 
-## Changes since Nov 22, 2025 / 2025年11月22日以來的變更
+This fork adds the following features to the original Snikket Web Portal.
 
-### New Features / 新功能
+此分支在原版 Snikket Web Portal 基礎上新增以下功能。
 
-#### MUC (Multi-User Chat) Management / MUC 群組聊天管理
+## Group Chat Management / 群組聊天管理
 
-- **Group chat editing** - Add ability to edit MUC group chat name and avatar (XEP-0045, XEP-0486)
+- Edit group chat name and avatar
+- Manage member affiliations (owner, admin, member, none)
+- Block/unblock users from group chats
+- View affiliation descriptions with XEP-0045 specification link
 
-  **群組聊天編輯** - 新增編輯 MUC 群組聊天名稱和頭像的功能（XEP-0045、XEP-0486）
+---
 
-- **Chat managers management** - Add/remove managers from circle members, change manager roles (owner/admin)
+- 編輯群組聊天名稱與頭像
+- 管理成員身份（擁有者、管理員、成員、預設）
+- 封鎖/解除封鎖群組聊天用戶
+- 查看身份說明與 XEP-0045 規範連結
 
-  **聊天管理員管理** - 從 Circle 成員中新增/移除管理員，變更管理員角色（owner/admin）
+## Internationalization / 國際化
 
-- **Administrators column** - Display administrators in circle edit page chat table
+- Traditional Chinese (zh_Hant_TW) translation
 
-  **管理員欄位** - 在 Circle 編輯頁面的聊天表格中顯示管理員
+---
 
-- **muc_shell.py module** - Execute MUC operations directly via `docker exec prosodyctl shell`, eliminating the need for Node.js MUC API server
+- 繁體中文 (zh_Hant_TW) 翻譯
 
-  **muc_shell.py 模組** - 透過 `docker exec prosodyctl shell` 直接執行 MUC 操作，不再需要 Node.js MUC API 伺服器
+## UI Improvements / 介面改善
 
-#### Internationalization / 國際化
+- Confirmation dialogs for destructive actions
+- Administrators column in circle chat table
 
-- **Traditional Chinese (zh_Hant_TW)** - Add complete Traditional Chinese translation
+---
 
-  **繁體中文 (zh_Hant_TW)** - 新增完整繁體中文翻譯
+- 刪除/移除操作前的確認對話框
+- Circle 聊天表格顯示管理員欄位
 
-#### UI/UX Improvements / 介面改善
+## Technical / 技術實作
 
-- **Confirm dialogs** - Add confirmation dialogs to all delete/remove actions (delete group chat, remove circle member, remove chat manager, delete avatar, delete/revoke invitation, destroy password reset link)
+- `muc_shell.py` - Direct MUC operations via `prosodyctl shell` (no Node.js dependency)
 
-  **確認對話框** - 為所有刪除/移除操作新增確認對話框
+---
 
-- **Styling improvements** - Adjust topbar, login page, and avatar image styling
-
-  **樣式改善** - 調整頂部導覽列、登入頁面和頭像圖片樣式
-
-#### Developer Experience / 開發者體驗
-
-- **start.sh script** - Add startup script with auto-detection of script directory and virtual environment activation
-
-  **start.sh 腳本** - 新增啟動腳本，支援自動偵測目錄和虛擬環境啟動
-
-- **CLAUDE.md** - Add development guidance for Claude Code instances
-
-  **CLAUDE.md** - 新增 Claude Code 開發指引文件
-
-### Bug Fixes / 錯誤修正
-
-- **MUC forbidden error** - Show user-friendly message when admin lacks MUC owner permissions
-
-  **MUC 權限錯誤** - 當管理員缺少 MUC owner 權限時顯示友善訊息
-
-- **MUC API integration** - Fix environment variable handling and non-JSON response handling
-
-  **MUC API 整合** - 修正環境變數處理和非 JSON 回應處理
-
-- **Template fixes** - Fix b64encode syntax and standard_button macro call
-
-  **模板修正** - 修正 b64encode 語法和 standard_button 巨集呼叫
-
-### Removed / 移除
-
-- **snikket_muc_api_server.js** - Deprecated Node.js MUC API server removed (replaced by muc_shell.py)
-
-  **snikket_muc_api_server.js** - 移除已棄用的 Node.js MUC API 伺服器（由 muc_shell.py 取代）
+- `muc_shell.py` - 透過 `prosodyctl shell` 直接執行 MUC 操作（無需 Node.js）
