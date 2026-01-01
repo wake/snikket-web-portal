@@ -936,6 +936,12 @@ msgstr "預設"
 msgid "Owner"
 msgstr "擁有者"
 
+msgid "Admin"
+msgstr "管理員"
+
+msgid "Outcast"
+msgstr "已封鎖"
+
 #: snikket_web/templates/admin_edit_circle.html:64
 msgid "Add group chat"
 msgstr "新增聊天群組"
