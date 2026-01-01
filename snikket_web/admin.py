@@ -752,33 +752,18 @@ async def edit_circle_chat(
         # Get current MUC config and avatar
         muc_jid = chat.jid
         muc_avatar = None
-        can_edit = True
 
         try:
             muc_config = await client.get_muc_config(muc_jid, session=session)
             current_name = muc_config.get("muc#roomconfig_roomname", [""])[0]
-        except werkzeug.exceptions.Forbidden:
-            # Admin doesn't have MUC owner permissions
-            current_name = chat.name
-            can_edit = False
         except Exception:
+            # Fallback to chat name from Circle API if MUC config unavailable
             current_name = chat.name
 
-        if can_edit:
-            try:
-                muc_avatar = await client.get_muc_avatar(muc_jid, session=session)
-            except werkzeug.exceptions.Forbidden:
-                can_edit = False
-            except Exception:
-                pass
-
-        if not can_edit:
-            await flash(
-                _("You don't have permission to edit this group chat. "
-                  "The admin account may not be the owner of this room."),
-                "alert",
-            )
-            return redirect(url_for(".edit_circle", id_=id_))
+        try:
+            muc_avatar = await client.get_muc_avatar(muc_jid, session=session)
+        except Exception:
+            pass
 
         # Get manager affiliations for this chat (from circle members only)
         # Only show owner/admin roles, not regular members
