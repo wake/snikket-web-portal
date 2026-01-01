@@ -36,15 +36,15 @@ BYTE_UNIT_SCALE_MAP = [
 ]
 
 
-# Mapping from browser language tags to our locale codes
-# Browser sends BCP 47 tags (e.g., zh-TW), we use locale codes (e.g., zh_Hant_TW)
+# Mapping from browser language tags to our locale codes (lowercase keys)
+# Browser sends BCP 47 tags (e.g., zh-TW or zh-tw), we use locale codes (e.g., zh_Hant_TW)
 LANGUAGE_ALIASES: typing.Dict[str, str] = {
-    "zh-TW": "zh_Hant_TW",
-    "zh-Hant": "zh_Hant_TW",
-    "zh-Hant-TW": "zh_Hant_TW",
-    "zh-CN": "zh_Hans_CN",
-    "zh-Hans": "zh_Hans_CN",
-    "zh-Hans-CN": "zh_Hans_CN",
+    "zh-tw": "zh_Hant_TW",
+    "zh-hant": "zh_Hant_TW",
+    "zh-hant-tw": "zh_Hant_TW",
+    "zh-cn": "zh_Hans_CN",
+    "zh-hans": "zh_Hans_CN",
+    "zh-hans-cn": "zh_Hans_CN",
     "zh": "zh_Hans_CN",  # Default Chinese to Simplified
 }
 
@@ -60,8 +60,8 @@ def selected_locale() -> str:
     # Fall back to browser Accept-Language header
     # First, try to match using aliases for Chinese variants
     for lang, quality in request.accept_languages:
-        # Normalize the language tag
-        normalized = lang.replace("_", "-")
+        # Normalize: replace underscore with hyphen, convert to lowercase
+        normalized = lang.replace("_", "-").lower()
         if normalized in LANGUAGE_ALIASES:
             alias_target = LANGUAGE_ALIASES[normalized]
             if alias_target in current_app.config['LANGUAGES']:
