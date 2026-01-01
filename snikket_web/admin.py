@@ -695,9 +695,17 @@ class EditCircleChatForm(BaseForm):
     affiliation_to_set = wtforms.SelectField(
         _l("Role"),
         choices=[
-            ("admin", _l("Admin")),
             ("owner", _l("Owner")),
+            ("admin", _l("Admin")),
+            ("member", _l("Member")),
+            ("none", _l("None")),
         ],
+        validate_choice=False,
+    )
+
+    # Block user section
+    user_to_block = wtforms.SelectField(
+        _l("Select user to block"),
         validate_choice=False,
     )
 
@@ -706,6 +714,8 @@ class EditCircleChatForm(BaseForm):
     action_add_manager = wtforms.SubmitField(_l("Add manager"))
     action_remove_member = wtforms.StringField()
     action_set_affiliation = wtforms.StringField()
+    action_block_user = wtforms.SubmitField(_l("Block user"))
+    action_unblock_user = wtforms.StringField()
 
 
 ECHATAVATAR_TOOBIG = _l(
@@ -765,45 +775,52 @@ async def edit_circle_chat(
         except Exception:
             pass
 
-        # Get manager affiliations for this chat (from circle members only)
-        # Only show owner/admin roles, not regular members
+        # Get affiliations for all circle members
         domain = current_app.config["SNIKKET_DOMAIN"]
-        chat_managers: typing.List[typing.Tuple[str, str]] = []  # (localpart, affiliation)
-        non_managers: typing.List[str] = []  # localparts not manager in chat
+        # (localpart, affiliation) for users with owner/admin/member/none
+        chat_members: typing.List[typing.Tuple[str, str]] = []
+        blocked_users: typing.List[str] = []  # outcast users
+        users_without_affiliation: typing.List[str] = []  # users not yet in list
 
         for localpart in circle.members:
             user_jid = f"{localpart}@{domain}"
             try:
                 affiliation = await client.muc_get_affiliation(muc_jid, user_jid)
-                if affiliation and affiliation in ["owner", "admin"]:
-                    chat_managers.append((localpart, affiliation))
+                if affiliation == "outcast":
+                    blocked_users.append(localpart)
+                elif affiliation and affiliation in ["owner", "admin", "member"]:
+                    chat_members.append((localpart, affiliation))
                 else:
-                    non_managers.append(localpart)
+                    users_without_affiliation.append(localpart)
             except Exception:
-                non_managers.append(localpart)
+                users_without_affiliation.append(localpart)
 
     form = EditCircleChatForm()
-    form.user_to_add.choices = sorted((lp, lp) for lp in non_managers)
+    # Users available to add (not yet in the affiliation list)
+    form.user_to_add.choices = sorted((lp, lp) for lp in users_without_affiliation)
+    # Users available to block (anyone not already blocked)
+    non_blocked = [lp for lp in circle.members if lp not in blocked_users]
+    form.user_to_block.choices = sorted((lp, lp) for lp in non_blocked)
 
     if request.method != "POST":
         form.name.data = current_name or chat.name
 
     if request.method == "POST":
-        # Manager actions - no full form validation needed
+        # Member affiliation actions - no full form validation needed
         if form.action_add_manager.data:
             user_to_add = form.user_to_add.data
             affiliation = form.affiliation_to_set.data or "admin"
-            if user_to_add and user_to_add in non_managers:
+            if user_to_add and user_to_add in users_without_affiliation:
                 user_jid = f"{user_to_add}@{domain}"
                 try:
                     await client.muc_set_affiliation(muc_jid, user_jid, affiliation)
                     await flash(
-                        _("Manager added to group chat"),
+                        _("Member affiliation updated"),
                         "success",
                     )
                 except Exception as e:
                     await flash(
-                        _("Failed to add manager: %(error)s", error=str(e)),
+                        _("Failed to set affiliation: %(error)s", error=str(e)),
                         "alert",
                     )
             return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
@@ -841,6 +858,39 @@ async def edit_circle_chat(
                         _("Failed to update role: %(error)s", error=str(e)),
                         "alert",
                     )
+            return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
+
+        elif form.action_block_user.data:
+            user_to_block = form.user_to_block.data
+            if user_to_block:
+                user_jid = f"{user_to_block}@{domain}"
+                try:
+                    await client.muc_set_affiliation(muc_jid, user_jid, "outcast")
+                    await flash(
+                        _("User blocked from group chat"),
+                        "success",
+                    )
+                except Exception as e:
+                    await flash(
+                        _("Failed to block user: %(error)s", error=str(e)),
+                        "alert",
+                    )
+            return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
+
+        elif form.action_unblock_user.data:
+            user_to_unblock = form.action_unblock_user.data
+            user_jid = f"{user_to_unblock}@{domain}"
+            try:
+                await client.muc_set_affiliation(muc_jid, user_jid, "none")
+                await flash(
+                    _("User unblocked"),
+                    "success",
+                )
+            except Exception as e:
+                await flash(
+                    _("Failed to unblock user: %(error)s", error=str(e)),
+                    "alert",
+                )
             return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
 
         # Full form validation for save/delete_avatar actions
@@ -898,7 +948,8 @@ async def edit_circle_chat(
         form=form,
         muc_avatar=muc_avatar,
         max_avatar_size=max_avatar_size,
-        chat_managers=chat_managers,
+        chat_members=chat_members,
+        blocked_users=blocked_users,
         domain=domain,
     )
 

@@ -41,10 +41,23 @@
 </div>
 </form>
 
-<h2 id="managers">{% trans %}Chat managers{% endtrans %}</h2>
-<p>{% trans %}Manage who can administrate this group chat.{% endtrans %}</p>
+<h2 id="members">{% trans %}Member permissions{% endtrans %}</h2>
+<p>{% trans %}Manage member affiliations for this group chat.{% endtrans %}</p>
+<details>
+	<summary>{% trans %}View affiliation types{% endtrans %}</summary>
+	<ul>
+		<li><strong>Owner</strong> - {% trans %}Full control: room settings, avatars, manage all users{% endtrans %}</li>
+		<li><strong>Admin</strong> - {% trans %}Administrative: kick users, grant membership{% endtrans %}</li>
+		<li><strong>Member</strong> - {% trans %}Can enter members-only rooms{% endtrans %}</li>
+		<li><strong>None</strong> - {% trans %}Default, no special privileges{% endtrans %}</li>
+		<li><strong>Outcast</strong> - {% trans %}Blocked from entering the room{% endtrans %}</li>
+	</ul>
+	<p><a href="https://xmpp.org/extensions/xep-0045.html#affil" target="_blank" rel="noopener">
+		{% trans %}View full XMPP MUC specification (XEP-0045){% endtrans %} ↗
+	</a></p>
+</details>
 
-{%- if chat_managers -%}
+{%- if chat_members -%}
 <form method="POST">
 {{- form.csrf_token -}}
 <div class="el-2 elevated"><table>
@@ -54,18 +67,20 @@
 		<th>{% trans %}Actions{% endtrans %}</th>
 	</thead>
 	<tbody>
-{%- for localpart, affiliation in chat_managers -%}
+{%- for localpart, affiliation in chat_members -%}
 		<tr>
 			<td>{{ localpart }}</td>
 			<td>
 				<select name="{{ form.action_set_affiliation.name }}" onchange="this.form.submit()" style="padding: 0.25em;">
-					<option value="{{ localpart }}:admin" {% if affiliation == 'admin' %}selected{% endif %}>{% trans %}Admin{% endtrans %}</option>
 					<option value="{{ localpart }}:owner" {% if affiliation == 'owner' %}selected{% endif %}>{% trans %}Owner{% endtrans %}</option>
+					<option value="{{ localpart }}:admin" {% if affiliation == 'admin' %}selected{% endif %}>{% trans %}Admin{% endtrans %}</option>
+					<option value="{{ localpart }}:member" {% if affiliation == 'member' %}selected{% endif %}>{% trans %}Member{% endtrans %}</option>
+					<option value="{{ localpart }}:none" {% if affiliation == 'none' %}selected{% endif %}>{% trans %}None{% endtrans %}</option>
 				</select>
 			</td>
 			<td class="nowrap">
-				{%- call custom_form_button("remove_user", form.action_remove_member.name, localpart, class="primary danger", slim=True, confirm=_("Are you sure you want to remove this manager?")) -%}
-					{% trans username=localpart %}Remove {{ username }} from managers{% endtrans %}
+				{%- call custom_form_button("remove_user", form.action_remove_member.name, localpart, class="primary danger", slim=True, confirm=_("Are you sure you want to remove this member's affiliation?")) -%}
+					{% trans username=localpart %}Remove {{ username }}'s affiliation{% endtrans %}
 				{%- endcall -%}
 			</td>
 		</tr>
@@ -74,14 +89,11 @@
 </table></div>
 </form>
 {%- else -%}
-<p>{% trans %}This group chat currently has no managers.{% endtrans %}</p>
-{%- if not target_circle.members -%}
-<p>{% trans %}This group chat currently has no members.{% endtrans %}</p>
-{%- endif -%}
+<p>{% trans %}No members have special affiliations in this group chat.{% endtrans %}</p>
 {%- endif -%}
 
 {%- if form.user_to_add.choices -%}
-<h3>{% trans %}Add manager{% endtrans %}</h3>
+<h3>{% trans %}Add member affiliation{% endtrans %}</h3>
 <form method="POST">
 {{- form.csrf_token -}}
 <div class="form layout-expanded">
@@ -97,6 +109,51 @@
 		{%- call form_button("add_user", form.action_add_manager, class="primary") %}{% endcall -%}
 	</div>
 </div>
+</form>
+{%- endif -%}
+
+<h2 id="blocked">{% trans %}Block user{% endtrans %}</h2>
+<p>{% trans %}Blocked users cannot enter this group chat.{% endtrans %}</p>
+
+{%- if form.user_to_block.choices -%}
+<form method="POST">
+{{- form.csrf_token -}}
+<div class="form layout-expanded">
+	<div class="f-ebox">
+		{{ form.user_to_block.label }}
+		<div class="select-wrap">{{ form.user_to_block }}</div>
+	</div>
+	<div class="f-bbox">
+		{%- call form_button("block", form.action_block_user, class="danger", confirm=_("Are you sure you want to block this user?")) %}{% endcall -%}
+	</div>
+</div>
+</form>
+{%- else -%}
+<p>{% trans %}No users available to block.{% endtrans %}</p>
+{%- endif -%}
+
+{%- if blocked_users -%}
+<h3>{% trans %}Blocked users{% endtrans %}</h3>
+<form method="POST">
+{{- form.csrf_token -}}
+<div class="el-2 elevated"><table>
+	<thead>
+		<th>{% trans %}User{% endtrans %}</th>
+		<th>{% trans %}Actions{% endtrans %}</th>
+	</thead>
+	<tbody>
+{%- for localpart in blocked_users -%}
+		<tr>
+			<td>{{ localpart }}</td>
+			<td class="nowrap">
+				{%- call custom_form_button("unlock", form.action_unblock_user.name, localpart, class="primary", slim=True, confirm=_("Are you sure you want to unblock this user?")) -%}
+					{% trans username=localpart %}Unblock {{ username }}{% endtrans %}
+				{%- endcall -%}
+			</td>
+		</tr>
+{%- endfor -%}
+	</tbody>
+</table></div>
 </form>
 {%- endif -%}
 
