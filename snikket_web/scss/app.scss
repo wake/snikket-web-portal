@@ -157,13 +157,19 @@ div#topbar {
 		border-radius: $w-s3;
 		margin-top: $w-s4;
 		padding: $w-s3 0;
-		list-style: none;
+		margin-left: 0;
+		padding-left: 0 !important;
+		list-style: none !important;
+		list-style-type: none !important;
 		min-width: 140px;
 		z-index: 1000;
 		box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 
 		li {
 			margin: 0;
+			padding-left: 0;
+			list-style: none !important;
+			list-style-type: none !important;
 		}
 
 		a {
