@@ -5,12 +5,15 @@
 	<header><a href="{{ url_for('.index') }}"><span>{{ config["SITE_NAME"] }}</span></a></header>
 	{% block topbar_left %}{% endblock %}
 	<div class="filler"></div>
-	<div class="topbar-language">
-		<select onchange="window.location.href='/set-language/' + this.value + '?next=' + encodeURIComponent(window.location.pathname + window.location.search)">
+	<div class="language-dropdown">
+		<button type="button" class="language-toggle" onclick="this.parentElement.classList.toggle('open')">
+			{{ lang | language_name }}
+		</button>
+		<ul class="language-menu">
 			{%- for code in config.LANGUAGES -%}
-			<option value="{{ code }}" {% if code == lang %}selected{% endif %}>{{ code }}</option>
+			<li><a href="/set-language/{{ code }}?next={{ request.path | urlencode }}" {% if code == lang %}class="active"{% endif %}>{{ code | language_name }}</a></li>
 			{%- endfor -%}
-		</select>
+		</ul>
 	</div>
 	{% block topbar_right %}{% endblock %}
 </div>

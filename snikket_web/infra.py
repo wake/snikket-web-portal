@@ -62,6 +62,27 @@ def circle_name(c: typing.Any) -> str:
     return c.name
 
 
+# Language names in their native form
+LANGUAGE_NAMES: typing.Dict[str, str] = {
+    "en": "English",
+    "da": "Dansk",
+    "de": "Deutsch",
+    "fr": "Français",
+    "id": "Bahasa Indonesia",
+    "it": "Italiano",
+    "pl": "Polski",
+    "ru": "Русский",
+    "sv": "Svenska",
+    "uk": "Українська",
+    "zh_Hant_TW": "繁體中文",
+    "zh_Hans_CN": "简体中文",
+}
+
+
+def language_name(code: str) -> str:
+    return LANGUAGE_NAMES.get(code, code)
+
+
 def format_bytes(n: float) -> str:
     try:
         scale = max(math.floor(math.log(n, 1024)), 0)
@@ -131,6 +152,7 @@ def init_templating(app: quart.Quart) -> None:
     app.template_filter("format_bytes")(format_bytes)
     app.template_filter("flatten")(flatten)
     app.template_filter("circle_name")(circle_name)
+    app.template_filter("language_name")(language_name)
     app.template_filter("format_last_activity")(format_last_activity)
     app.context_processor(template_now)
     app.after_request(add_vary_language_header)

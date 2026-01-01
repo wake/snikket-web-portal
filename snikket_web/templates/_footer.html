@@ -6,11 +6,14 @@
 		<li>{% trans %}"Snikket" and the parrot logo are trademarks of Snikket Community Interest Company.{% endtrans %}</li>
 		{#- -#}
 	</ul>
-	<div class="language-selector">
-		<select onchange="window.location.href='/set-language/' + this.value + '?next=' + encodeURIComponent(window.location.pathname + window.location.search)">
+	<div class="language-dropdown footer">
+		<button type="button" class="language-toggle" onclick="this.parentElement.classList.toggle('open')">
+			{{ lang | language_name }}
+		</button>
+		<ul class="language-menu">
 			{%- for code in config.LANGUAGES -%}
-			<option value="{{ code }}" {% if code == lang %}selected{% endif %}>{{ code }}</option>
+			<li><a href="/set-language/{{ code }}?next={{ request.path | urlencode }}" {% if code == lang %}class="active"{% endif %}>{{ code | language_name }}</a></li>
 			{%- endfor -%}
-		</select>
+		</ul>
 	</div>
 </footer>
