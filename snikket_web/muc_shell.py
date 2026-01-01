@@ -58,7 +58,7 @@ async def run_prosody_shell(lua_code: str) -> str:
         lua_code: 要執行的 Lua 程式碼
 
     Returns:
-        stdout 輸出
+        合併的 stdout + stderr 輸出
 
     Raises:
         RuntimeError: 如果執行失敗
@@ -75,10 +75,22 @@ async def run_prosody_shell(lua_code: str) -> str:
     )
     stdout, stderr = await proc.communicate()
 
-    if proc.returncode != 0:
-        raise RuntimeError(f"prosody error: {stderr.decode()}")
+    # prosodyctl shell 可能將結果輸出到 stderr，合併處理
+    stdout_str = stdout.decode().strip()
+    stderr_str = stderr.decode().strip()
+    combined = f"{stdout_str}\n{stderr_str}".strip()
 
-    return stdout.decode()
+    # 檢查是否為真正的錯誤（不是 "Result: true" 等成功訊息）
+    if proc.returncode != 0:
+        # "Result: true" 表示成功，不應視為錯誤
+        if "Result: true" in combined or "| true" in combined:
+            return combined
+        # 檢查是否為已知的成功結果模式
+        if any(aff in combined.lower() for aff in VALID_AFFILIATIONS):
+            return combined
+        raise RuntimeError(f"prosody error: {combined}")
+
+    return combined if combined else stdout_str
 
 
 def parse_muc_list_output(stdout: str) -> typing.List[str]:

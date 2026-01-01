@@ -12,10 +12,13 @@ TAG_XMPP_ERROR = "error"
 NS_XMPP_ERROR_CONDITION = "urn:ietf:params:xml:ns:xmpp-stanzas"
 TAG_XMPP_ERROR_ITEM_NOT_FOUND = \
     "{{{}}}item-not-found".format(NS_XMPP_ERROR_CONDITION)
+TAG_XMPP_ERROR_FORBIDDEN = \
+    "{{{}}}forbidden".format(NS_XMPP_ERROR_CONDITION)
 TAG_XMPP_ERROR_TEXT = "{{{}}}text".format(NS_XMPP_ERROR_CONDITION)
 
 ERROR_CODE_MAP = {
     TAG_XMPP_ERROR_ITEM_NOT_FOUND: 404,
+    TAG_XMPP_ERROR_FORBIDDEN: 403,
 }
 
 NS_PUBSUB = "http://jabber.org/protocol/pubsub"

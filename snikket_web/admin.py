@@ -861,11 +861,17 @@ async def edit_circle_chat(
         # Full form validation for save/delete_avatar actions
         elif form.validate_on_submit():
             if form.action_delete_avatar.data:
-                await client.delete_muc_avatar(muc_jid)
-                await flash(
-                    _("Group chat avatar removed"),
-                    "success",
-                )
+                try:
+                    await client.delete_muc_avatar(muc_jid)
+                    await flash(
+                        _("Group chat avatar removed"),
+                        "success",
+                    )
+                except werkzeug.exceptions.Forbidden:
+                    await flash(
+                        _("Permission denied: only room owners can change the avatar"),
+                        "alert",
+                    )
                 return redirect(url_for(".edit_circle_chat", id_=id_, chat_id=chat_id))
 
             elif form.action_save.data:
@@ -880,7 +886,14 @@ async def edit_circle_chat(
                         form.avatar.errors.append(ECHATAVATAR_TOOBIG)
                         ok = False
                     elif len(data) > 0:
-                        await client.set_muc_avatar(muc_jid, data, mimetype)
+                        try:
+                            await client.set_muc_avatar(muc_jid, data, mimetype)
+                        except werkzeug.exceptions.Forbidden:
+                            await flash(
+                                _("Permission denied: only room owners can change the avatar"),
+                                "alert",
+                            )
+                            ok = False
 
                 # Update name if changed
                 if ok and form.name.data != current_name:
