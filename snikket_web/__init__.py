@@ -251,36 +251,44 @@ def create_app() -> quart.Quart:
     @app.route("/site.webmanifest")
     def site_manifest() -> quart.Response:
         # this is needed for icons
+        site_name = current_app.config.get("SITE_NAME", "Snikket")
+        custom_favicon = current_app.config.get("CUSTOM_FAVICON", "")
+
+        if custom_favicon:
+            icons = [{"src": custom_favicon, "type": "image/png"}]
+        else:
+            icons = [
+                {
+                    "src": url_for(
+                        "static",
+                        filename="img/android-chrome-192x192.png",
+                    ),
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": url_for(
+                        "static",
+                        filename="img/android-chrome-256x256.png",
+                    ),
+                    "sizes": "256x256",
+                    "type": "image/png"
+                },
+                {
+                    "src": url_for(
+                        "static",
+                        filename="img/android-chrome-512x512.png",
+                    ),
+                    "sizes": "512x512",
+                    "type": "image/png"
+                },
+            ]
+
         return jsonify(
             {
-                "name": "Snikket",
-                "short_name": "Snikket",
-                "icons": [
-                    {
-                        "src": url_for(
-                            "static",
-                            filename="img/android-chrome-192x192.png",
-                        ),
-                        "sizes": "192x192",
-                        "type": "image/png"
-                    },
-                    {
-                        "src": url_for(
-                            "static",
-                            filename="img/android-chrome-256x256.png",
-                        ),
-                        "sizes": "256x256",
-                        "type": "image/png"
-                    },
-                    {
-                        "src": url_for(
-                            "static",
-                            filename="img/android-chrome-512x512.png",
-                        ),
-                        "sizes": "512x512",
-                        "type": "image/png"
-                    },
-                ],
+                "name": site_name,
+                "short_name": site_name,
+                "icons": icons,
                 "theme_color": "#fbfdff",
                 "background_color": "#fbfdff",
             }
